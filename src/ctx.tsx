@@ -1,5 +1,6 @@
-import React from "react";
-import { useStorageState } from "./hooks/useLocalStorage";
+import React from 'react';
+
+import { useStorageState } from './hooks/useLocalStorage';
 
 const AuthContext = React.createContext<{
   signIn: () => void;
@@ -11,9 +12,9 @@ const AuthContext = React.createContext<{
 // This hook can be used to access the user info.
 export function useSession() {
   const value = React.useContext(AuthContext);
-  if (process.env.NODE_ENV !== "production") {
+  if (process.env.NODE_ENV !== 'production') {
     if (!value) {
-      throw new Error("useSession must be wrapped in a <SessionProvider />");
+      throw new Error('useSession must be wrapped in a <SessionProvider />');
     }
   }
 
@@ -21,21 +22,21 @@ export function useSession() {
 }
 
 export function SessionProvider(props) {
-  console.info("useStorageState", useStorageState);
-  const [[isLoading, session], setSession] = useStorageState("session");
+  console.info('useStorageState', useStorageState);
+  const [[isLoading, session], setSession] = useStorageState('session');
 
   return (
     <AuthContext.Provider
       value={{
         signIn: () => {
           // Perform sign-in logic here
-          setSession("xxx");
+          setSession('xxx');
         },
         signOut: () => {
           setSession(null);
         },
         session,
-        isLoading,
+        isLoading
       }}
     >
       {props.children}

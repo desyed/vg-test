@@ -1,21 +1,21 @@
-import React from "react";
-import { Modifiers, Text, View } from "react-native-ui-lib";
-import { Bounceable } from "rn-bounceable";
+import React from 'react';
+import { Modifiers, Text, View } from 'react-native-ui-lib';
+import { Bounceable } from 'rn-bounceable';
 
 type Props = Modifiers.MarginModifiers &
   Modifiers.FlexModifiers & {
     label?: string;
     onPress?: PureFunc;
-    size?: "medium" | "small";
+    size?: 'medium' | 'small';
   };
 
 export const BButton: React.FC<Props> = ({
   label,
   onPress,
-  size = "medium",
+  size = 'medium',
   ...modifiers
 }) => {
-  const textSize = size === "medium" ? { text65M: true } : { text70: true };
+  const textSize = size === 'medium' ? { text65M: true } : { text70: true };
 
   return (
     <View {...modifiers}>

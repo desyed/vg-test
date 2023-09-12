@@ -1,16 +1,16 @@
-import { rootApi } from './rootApi'
+import { rootApi } from './rootApi';
 
 const customerApi = rootApi.injectEndpoints({
-    endpoints: (builder) => ({
-        getCustomers: builder.query({
-            query: (payload) => ({
-                url: "/customers",
-                method: "GET",
-                body: payload
-            }),
-        }),
-    }),
-    overrideExisting: false,
-})
+  endpoints: (builder) => ({
+    getCustomers: builder.query({
+      query: (payload) => ({
+        url: '/customers',
+        method: 'GET',
+        body: payload
+      })
+    })
+  }),
+  overrideExisting: false
+});
 
-export const { useGetCustomersQuery } = customerApi
+export const { useGetCustomersQuery } = customerApi;

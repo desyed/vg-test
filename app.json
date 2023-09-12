@@ -14,13 +14,23 @@
     },
     "assetBundlePatterns": ["**/*"],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSCameraUsageDescription": "VideoGift needs access to your Camera.",
+        "NSMicrophoneUsageDescription": "VideoGift needs access to your Microphone."
+      },
+      "bundleIdentifier": "com.videogift"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO"
+      ],
+      "package": "com.videogift"
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -28,18 +38,23 @@
     "plugins": [
       "expo-router",
       [
-        "react-native-vision-camera",
+        "expo-camera",
         {
-          "cameraPermissionText": "VideoGift needs access to your Camera.",
-
-          // optionally, if you want to record audio:
-          "enableMicrophonePermission": true,
-          "microphonePermissionText": "VideoGift needs access to your Microphone."
+          "cameraPermission": "Allow VideoGift to access your camera.",
+          "microphonePermission": "Allow VideoGift to access your mic."
         }
       ]
     ],
     "experiments": {
       "tsconfigPaths": true
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "5d8bafea-db58-42bc-8787-ac5640a390b5"
+      }
     }
   }
 }
