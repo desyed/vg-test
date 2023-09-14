@@ -9,7 +9,7 @@
    "files.autoSave": "off",
    "typescript.updateImportsOnFileMove.enabled": "always",
    "javascript.updateImportsOnFileMove.enabled": "always",
-   "editor.wordWrap": "on",
+   "editor.wordWrap": "off",
    "editor.defaultFormatter": "esbenp.prettier-vscode",
    "editor.formatOnSave": false,
    "[typescriptreact]": {

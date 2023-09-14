@@ -8,9 +8,18 @@ const videoGiftApi = rootApi.injectEndpoints({
         method: 'GET',
         body: credentials
       })
+    }),
+    createVideoGiftOrder: builder.mutation({
+      query: (payload) => ({
+        url: `/videogift/${payload.id}/order`,
+        method: 'POST',
+        body: payload
+      }),
+      invalidatesTags: ['Customers']
     })
   }),
   overrideExisting: false
 });
 
-export const { useGetVideoGiftQuery } = videoGiftApi;
+export const { useGetVideoGiftQuery, useCreateVideoGiftOrderMutation } =
+  videoGiftApi;

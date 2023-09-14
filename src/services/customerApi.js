@@ -7,7 +7,8 @@ const customerApi = rootApi.injectEndpoints({
         url: '/customers',
         method: 'GET',
         body: payload
-      })
+      }),
+      providesTags: ['Customers']
     })
   }),
   overrideExisting: false

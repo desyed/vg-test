@@ -1,100 +1,63 @@
 import { DrawerToggleButton } from '@react-navigation/drawer';
-import { CameraButton } from 'components/camera/CameraButton';
-import { CAMERA_TYPE } from 'constants';
-import { Camera, CameraType } from 'expo-camera';
+import { BarCodeScanner } from 'expo-barcode-scanner';
+import { useRouter } from 'expo-router';
 import { Drawer } from 'expo-router/drawer';
-import { useRef, useState } from 'react';
-import { Button, StyleSheet, View } from 'react-native';
-import { SegmentedControl, Text } from 'react-native-ui-lib';
+import React, { useEffect, useState } from 'react';
+import { Button, StyleSheet, Text, View } from 'react-native';
+import UrlParse from 'url-parse';
 
-export default function Index() {
-  const cameraRef = useRef(null);
-  const [media, setMedia] = useState([]);
-  const [type, setType] = useState(CameraType.back);
-  const [cameraType, setCameraType] = useState(CAMERA_TYPE.VIDEO);
-  const [permission, requestPermission] = Camera.useCameraPermissions();
+export default function CameraScannerScreen() {
+  const [hasPermission, setHasPermission] = useState(null);
+  const [scanned, setScanned] = useState(false);
+  const router = useRouter();
+  useEffect(() => {
+    const getBarCodeScannerPermissions = async () => {
+      const { status } = await BarCodeScanner.requestPermissionsAsync();
+      setHasPermission(status === 'granted');
+    };
 
-  const [recording, setRecording] = useState(false);
+    getBarCodeScannerPermissions();
+  }, []);
 
-  const beginVideo = () => {
-    if (recording) {
-      setRecording(false);
-      return cameraRef.current.stopRecording();
-    } else {
-      setRecording(true);
-      return cameraRef.current.recordAsync().then((data) => {
-        console.log(data);
-      });
-    }
+  const handleBarCodeScanned = ({ type, data }) => {
+    setScanned(true);
+    // router.push('(drawer)/(tabs)/camera/recorder');
+    const myURL = new UrlParse(data);
+    const pathname = myURL.pathname;
+    const pathnameParts = pathname.split('/');
+    const videoGiftId = pathnameParts[pathnameParts.length - 1];
+
+    router.push({
+      pathname: '(drawer)/(tabs)/camera/recorder',
+      params: { videoGiftId }
+    });
   };
 
-  function takePicture() {
-    if (cameraRef.current) {
-      cameraRef.current.takePictureAsync().then((data) => {
-        console.log(data);
-      });
-    }
+  if (hasPermission === null) {
+    return <Text>Requesting for camera permission</Text>;
+  }
+  if (hasPermission === false) {
+    return <Text>No access to camera</Text>;
   }
 
-  if (!permission) {
-    // Camera permissions are still loading
-    return <View />;
-  }
-
-  if (!permission.granted) {
-    // Camera permissions are not granted yet
-    return (
-      <View style={styles.container}>
-        <Text style={{ textAlign: 'center' }}>
-          We need your permission to show the camera
-        </Text>
-        <Button onPress={requestPermission} title="grant permission" />
-      </View>
-    );
-  }
-
-  function toggleCameraType() {
-    setType((current) =>
-      current === CameraType.back ? CameraType.front : CameraType.back
-    );
-  }
   return (
     <>
       <Drawer.Screen
         options={{
-          title: 'Camera',
-          headerShown: false,
+          title: 'FInd QR Code',
+          headerShown: true,
           headerLeft: () => <DrawerToggleButton />
         }}
       />
-      <View style={styles.container}>
-        <Camera style={styles.camera} type={type} ref={cameraRef}>
-          <View style={styles.buttonContainer}>
-            <View style={{ width: '100%', position: 'absolute', top: 20 }}>
-              <SegmentedControl
-                onChangeIndex={(index) => {
-                  if (index === 0) setCameraType(CAMERA_TYPE.VIDEO);
-                  if (index === 1) setCameraType(CAMERA_TYPE.PHOTO);
-                }}
-                activeColor="green"
-                backgroundColor="transparent"
-                segments={[{ label: 'Video' }, { label: 'Photo' }]}
-              />
-            </View>
 
-            {/* <TouchableOpacity style={styles.button} onPress={toggleCameraType}>
-                            <Text style={styles.text}>Flip Camera d</Text>
-                        </TouchableOpacity> */}
-            <View style={styles.button}>
-              <CameraButton
-                beginVideo={beginVideo}
-                recording={recording}
-                cameraType={cameraType}
-                takePicture={takePicture}
-              />
-            </View>
-          </View>
-        </Camera>
+      <View style={styles.container}>
+        <BarCodeScanner
+          onBarCodeScanned={scanned ? undefined : handleBarCodeScanned}
+          style={StyleSheet.absoluteFillObject}
+        />
+        {scanned && (
+          <Button title="Tap to Scan Again" onPress={() => setScanned(false)} />
+        )}
       </View>
     </>
   );
@@ -103,28 +66,7 @@ export default function Index() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    display: 'relative'
-  },
-  camera: {
-    height: '100%',
-    width: '100%'
-  },
-  buttonContainer: {
-    flex: 1,
-    flexDirection: 'row',
-    backgroundColor: 'transparent',
-    margin: 64,
-    position: 'relative'
-  },
-  button: {
-    flex: 1,
-    alignSelf: 'flex-end',
-    alignItems: 'center'
-  },
-  text: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: 'white'
+    flexDirection: 'column',
+    justifyContent: 'center'
   }
 });

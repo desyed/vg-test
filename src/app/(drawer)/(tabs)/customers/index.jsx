@@ -1,18 +1,64 @@
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { DrawerToggleButton } from '@react-navigation/drawer';
-import { Stack, useRouter } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { Drawer } from 'expo-router/drawer';
-import { Alert, Button, FlatList, StyleSheet, View } from 'react-native';
+import { size } from 'lodash';
+import { FlatList, Pressable, StyleSheet } from 'react-native';
 import {
   BorderRadiuses,
   Colors,
-  ListItem,
   LoaderScreen,
-  Text
+  Text,
+  View
 } from 'react-native-ui-lib';
 import { useGetCustomersQuery } from 'services/customerApi';
 
 const Item = ({ item, index }) => {
   const router = useRouter();
+  return (
+    <>
+      <View flex margin-10 bg-grey70 padding-10>
+        <View>
+          <Text text70 style={{ flex: 1, marginRight: 10 }} numberOfLines={1}>
+            {item.name}
+          </Text>
+        </View>
+        <View>
+          <Text text90 style={{ flex: 1, marginRight: 10 }} numberOfLines={1}>
+            {`${size(item?.videoGift)}`} Orders
+          </Text>
+        </View>
+        <View>
+          <Text text90 style={{ flex: 1, marginRight: 10 }} numberOfLines={1}>
+            {`${new Date(item?.createdAt).toLocaleDateString('en-US', {
+              weekday: 'long',
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric'
+            })}`}
+          </Text>
+        </View>
+      </View>
+    </>
+  );
+};
+export default function Index() {
+  const router = useRouter();
+  const {
+    data: customers,
+    isLoading,
+    refetch,
+    isFetching
+  } = useGetCustomersQuery();
+  console.info('customers', customers?.data);
+
+  const keyExtractor = (item) => item.id;
+
+  const onRefresh = () => {
+    refetch();
+  };
+
+  if (isLoading) return <LoaderScreen message="Loading" overlay />;
 
   return (
     <>
@@ -20,67 +66,26 @@ const Item = ({ item, index }) => {
         options={{
           title: 'Customers',
           headerShown: true,
-          headerLeft: () => <DrawerToggleButton />
+          headerLeft: () => <DrawerToggleButton />,
+          headerRight: () => (
+            <Pressable
+              onPress={() => router.push('(drawer)/(tabs)/customers/create')}
+            >
+              <Ionicons name="add-circle" size={32} color="black" />
+            </Pressable>
+          )
         }}
       />
-      <View style={{ width: '100%' }}>
-        <ListItem
-          activeBackgroundColor={Colors.grey60}
-          activeOpacity={0.3}
-          height={77.5}
-          onPress={() =>
-            Alert.alert(`pressed on order #${JSON.stringify(item)}`)
-          }
-        >
-          <ListItem.Part left containerStyle={{ marginBottom: 3 }}>
-            <Text
-              grey10
-              text70
-              style={{ flex: 1, marginRight: 10 }}
-              numberOfLines={1}
-            >
-              {item?.name}
-            </Text>
-            <Button
-              onPress={() => {
-                router.push('(drawer)/(tabs)/customers/customer-details', {
-                  id: item?.id
-                });
-              }}
-              title="Begin"
-            >
-              Begin
-            </Button>
-          </ListItem.Part>
-          <ListItem.Part middle>
-            <Text
-              style={{ flex: 1, marginRight: 10 }}
-              text90
-              grey40
-              numberOfLines={1}
-            >{`${item?.videoGift?.[0]?.title}`}</Text>
-          </ListItem.Part>
-        </ListItem>
+      <View style={{ flex: 1 }}>
+        <FlatList
+          data={customers?.data}
+          renderItem={Item}
+          keyExtractor={keyExtractor}
+          onRefresh={() => onRefresh()}
+          refreshing={isFetching}
+        />
       </View>
     </>
-  );
-};
-export default function Index() {
-  const { data: customers, isLoading } = useGetCustomersQuery();
-  console.info('customers', customers?.data);
-
-  const keyExtractor = (item) => item.id;
-  if (isLoading) return <LoaderScreen message="Loading" overlay />;
-
-  return (
-    <View style={{ flex: 1 }}>
-      <Stack.Screen options={{ headerShown: false, title: 'Customer' }} />
-      <FlatList
-        data={customers?.data}
-        renderItem={Item}
-        keyExtractor={keyExtractor}
-      />
-    </View>
   );
 }
 

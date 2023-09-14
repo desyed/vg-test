@@ -12,6 +12,7 @@ export const rootApi = createApi({
     }
     return headers;
   },
+  tagTypes: ['Customers'],
   endpoints: () => ({})
 });
 

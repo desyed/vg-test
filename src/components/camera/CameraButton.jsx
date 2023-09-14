@@ -1,6 +1,6 @@
 import { CAMERA_TYPE } from 'constants';
 import { useState } from 'react';
-import { Pressable, View } from 'react-native';
+import { Pressable } from 'react-native';
 import { AnimatedCircularProgress } from 'react-native-circular-progress';
 import Animated, {
   interpolateColor,
@@ -12,16 +12,16 @@ import Animated, {
 
 const VideoButton = ({ beginVideo, recording }) => {
   const progressVideo = useDerivedValue(() => {
-    if (!recording) return withTiming(0);
+    if (!recording) return withTiming(-1);
 
-    return withRepeat(withTiming(1, { duration: 2000 }), 0, true); //withTiming(1, { duration: 1000 })
+    return withRepeat(withTiming(1, { duration: 1000 }), 0, true); //withTiming(1, { duration: 1000 })
   }, [recording]);
 
   const rStyle = useAnimatedStyle(() => {
     const backgroundColor = interpolateColor(
       progressVideo.value,
-      [0, 1],
-      ['rgba(255, 102, 102, 1)', 'rgba(139, 0, 0, 1)']
+      [-1, 0, 1],
+      ['white', 'rgba(255, 102, 102, 1)', 'rgba(139, 0, 0, 1)']
     );
     return { backgroundColor };
   });
@@ -38,28 +38,16 @@ const VideoButton = ({ beginVideo, recording }) => {
         height: '100%'
       }}
     >
-      {recording ? (
-        <Animated.View
-          style={[
-            {
-              width: '100%',
-              height: '100%',
-              backgroundColor: 'white'
-            },
-            rStyle
-          ]}
-        />
-      ) : (
-        <View
-          style={[
-            {
-              width: '100%',
-              height: '100%',
-              backgroundColor: 'white'
-            }
-          ]}
-        />
-      )}
+      <Animated.View
+        style={[
+          {
+            width: '100%',
+            height: '100%',
+            backgroundColor: 'white'
+          },
+          rStyle
+        ]}
+      />
     </Pressable>
   );
 };
@@ -119,14 +107,14 @@ export const CameraButton = ({
   return (
     <AnimatedCircularProgress
       size={80}
-      width={8}
+      width={2}
       fill={100}
       tintColor="red"
       backgroundWidth={1}
       onAnimationComplete={() => console.log('onAnimationComplete')}
       backgroundColor="white"
     >
-      {(fill) => (
+      {() => (
         <>
           {cameraType === CAMERA_TYPE.VIDEO ? (
             <VideoButton beginVideo={beginVideo} recording={recording} />

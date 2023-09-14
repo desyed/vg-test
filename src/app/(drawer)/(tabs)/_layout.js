@@ -36,7 +36,7 @@ export default function TabsLayout() {
           }}
         />
         <Tabs.Screen
-          name="camera/index"
+          name="camera"
           options={{
             tabBarLabel: 'Camera',
             title: 'Camera',

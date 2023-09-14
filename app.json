@@ -43,6 +43,12 @@
           "cameraPermission": "Allow VideoGift to access your camera.",
           "microphonePermission": "Allow VideoGift to access your mic."
         }
+      ],
+      [
+        "expo-barcode-scanner",
+        {
+          "cameraPermission": "Allow VideoGift to access your camera."
+        }
       ]
     ],
     "experiments": {

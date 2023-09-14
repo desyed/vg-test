@@ -1,7 +1,7 @@
+import { useRef } from 'react';
 import { Controller } from 'react-hook-form';
-import { StyleSheet } from 'react-native';
-import { TextInput } from 'react-native-gesture-handler';
-import { Text, View } from 'react-native-ui-lib';
+import { Pressable, StyleSheet } from 'react-native';
+import { Text, TextField, View } from 'react-native-ui-lib';
 
 export const CustomTextInput = ({
   control,
@@ -11,6 +11,8 @@ export const CustomTextInput = ({
   textInputProps = {},
   rules = {}
 }) => {
+  const ref = useRef(null);
+
   return (
     <Controller
       control={control}
@@ -20,11 +22,16 @@ export const CustomTextInput = ({
         field: { value, onChange, onBlur },
         fieldState: { error }
       }) => (
-        <>
+        <Pressable
+          onPress={() => {
+            ref.current.focus();
+          }}
+        >
           <View
             style={[styles.container, { borderColor: error ? 'red' : null }]}
           >
-            <TextInput
+            <TextField
+              ref={ref}
               placeholder={placeholder}
               secureTextEntry={secureTextEntry}
               value={value}
@@ -38,7 +45,7 @@ export const CustomTextInput = ({
               {error?.message || 'Error'}
             </Text>
           )}
-        </>
+        </Pressable>
       )}
     />
   );
