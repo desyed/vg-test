@@ -11,13 +11,12 @@ import {
   Spacings,
   Text
 } from 'react-native-ui-lib';
+import { useCreateVideoGiftOrderMutation } from 'services/ordersApi';
 import { useSearchOrganizationUsersQuery } from 'services/organizationApi';
-import { useCreateVideoGiftOrderMutation } from 'services/videoGiftApi';
 
 export default function CreateCustomerScreen() {
   const searchParams = useLocalSearchParams();
 
-  console.info('searchParams', searchParams);
   const router = useRouter();
 
   const [createOrder, { isLoading: isCreateLoading }] =

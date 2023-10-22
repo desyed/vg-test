@@ -8,8 +8,8 @@ import Animated, {
   withTiming
 } from 'react-native-reanimated';
 import { Button, Colors, Image } from 'react-native-ui-lib';
-
 export default function Page() {
+  console.info('EXPO_PUBLIC_API_URL', process.env.EXPO_PUBLIC_API_URL);
   const offset = useSharedValue(200);
 
   const animatedStyles = useAnimatedStyle(() => ({

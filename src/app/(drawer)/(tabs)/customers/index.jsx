@@ -42,6 +42,7 @@ const Item = ({ item, index }) => {
     </>
   );
 };
+
 export default function Index() {
   const router = useRouter();
   const {

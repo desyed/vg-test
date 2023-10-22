@@ -5,41 +5,37 @@ import { useEffect, useRef, useState } from 'react';
 import { StyleSheet } from 'react-native';
 import { Image, Text, View } from 'react-native-ui-lib';
 import { useGetSignedPutUrlMutation } from 'services/awsApi';
+import {
+  useCreateMediaMutation,
+  useSelectMediaMutation
+} from 'services/mediaApi';
 import { createMediaUploadTask } from 'utils/uploadUtil';
 
-export const MediaPreview = ({ media, setMedia }) => {
-  const [getSignedPutUrl, { data, loading, error }] =
-    useGetSignedPutUrlMutation();
+export const MediaPreview = ({ media, setMedia, videoGiftId }) => {
+  const [getSignedPutUrl] = useGetSignedPutUrlMutation();
+  const [createMedia] = useCreateMediaMutation();
+  const [selectMedia] = useSelectMediaMutation();
   const video = useRef(null);
 
-  console.info('media', media);
   const [progress, setProgress] = useState({});
 
   const upload = async () => {
     const currentMedia = find(media, (m) => m.uploadStatus === 'NEW');
 
     if (!currentMedia) return;
-    const taskPicture = await createMediaUploadTask({
-      uri: currentMedia?.pictureData?.uri,
-      getSignedPutUrl,
-
-      onProgress: (e) => {
-        setProgress({
-          ...progress,
-          [currentMedia?.id]: e.totalBytesSent / e.totalBytesExpectedToSend
-        });
-        console.info('PROGRESS', progress);
-      }
-    });
 
     const taskVideo = await createMediaUploadTask({
       uri: currentMedia?.data?.uri,
       getSignedPutUrl,
-
+      acl: 'private',
       onProgress: (e) => {
         setProgress({
           ...progress,
-          [currentMedia?.id]: e.totalBytesSent / e.totalBytesExpectedToSend
+
+          [currentMedia?.id]: {
+            ...progress[currentMedia?.id],
+            video: e.totalBytesSent / e.totalBytesExpectedToSend
+          }
         });
         console.info('PROGRESS', progress);
       }
@@ -54,11 +50,22 @@ export const MediaPreview = ({ media, setMedia }) => {
       })
     );
 
-    if (taskVideo && taskPicture) {
-      const response = await taskVideo.task.uploadAsync();
-      const responsePicture = await taskPicture.task.uploadAsync();
-      console.info('response', response);
-      console.info('responsePicture', responsePicture);
+    if (taskVideo) {
+      await taskVideo.task.uploadAsync();
+
+      const mediaResponse = await createMedia({
+        // previewImageUrl: taskPicture?.url,
+        originalKey: taskVideo?.key,
+        type: 'VIDEO',
+        videoGiftId
+      });
+      if (mediaResponse?.data) {
+        selectMedia({
+          videoGiftId,
+          mediaId: mediaResponse?.data?.id,
+          order: 'NEXT'
+        });
+      }
 
       setMedia(
         map(media, (m) => {
@@ -128,7 +135,11 @@ export const MediaPreview = ({ media, setMedia }) => {
           white
           text50
         >
-          {Math.round((progress?.[currentMedia?.id] || 0) * 100)}%
+          {Math.round(
+            ((progress?.[currentMedia?.id]?.picture || 0) / 2 +
+              (progress?.[currentMedia?.id]?.video || 0) / 2 || 0) * 100
+          )}
+          %
         </Text>
       </View>
     </View>

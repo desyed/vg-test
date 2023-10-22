@@ -29,7 +29,6 @@ export const CustomSelect = ({
               placeholder={placeholder}
               value={value}
               onChange={(item) => {
-                console.info('item', item);
                 onChange(item);
               }}
               topBarProps={{ title: 'Languages' }}

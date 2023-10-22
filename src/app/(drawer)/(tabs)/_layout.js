@@ -45,6 +45,16 @@ export default function TabsLayout() {
             )
           }}
         />
+        <Tabs.Screen
+          name="orders"
+          options={{
+            tabBarLabel: 'Orders',
+            title: 'Orders',
+            tabBarIcon: ({ color, size }) => (
+              <Ionicons name="card-outline" size={size} color={color} />
+            )
+          }}
+        />
       </Tabs>
     </>
   );

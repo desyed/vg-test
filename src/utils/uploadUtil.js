@@ -2,10 +2,12 @@ import * as FileSystem from 'expo-file-system';
 import mime from 'mime';
 import uuid from 'react-native-uuid';
 
+import { createS3Url } from './awsUtil';
+
 export const createMediaUploadTask = async ({
   uri,
   getSignedPutUrl,
-
+  acl,
   onProgress
 }) => {
   console.info('uploading', uri);
@@ -16,7 +18,8 @@ export const createMediaUploadTask = async ({
   const key = `videogift/media/${filename}`;
   const result = await getSignedPutUrl({
     key,
-    contentType: mimeType
+    contentType: mimeType,
+    acl
   });
   if (result?.data) {
     const task = FileSystem.createUploadTask(
@@ -31,7 +34,7 @@ export const createMediaUploadTask = async ({
       onProgress
     );
 
-    return { task, key, filename, mimeType };
+    return { task, key, filename, mimeType, url: createS3Url(key) };
   }
 
   return null;

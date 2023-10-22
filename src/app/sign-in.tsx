@@ -1,9 +1,12 @@
-import { BButton } from 'components/button';
-import { CustomTextInput } from 'components/customTextInput';
+import { ErrorAlert } from 'components/ui/Alert';
+import { PrimaryButton } from 'components/ui/PrimaryButton';
+import { StandardContainer } from 'components/ui/StandardContainer';
+import { Title } from 'components/ui/Title';
+import { TextInput } from 'components/ui/form/TextInput';
 import { useRouter } from 'expo-router';
 import { useForm } from 'react-hook-form';
 import { ScrollView } from 'react-native';
-import { Colors, Text, View } from 'react-native-ui-lib';
+import { Image, View } from 'react-native-ui-lib';
 import { useDispatch } from 'react-redux';
 import { useLoginMutation } from 'services/authApi';
 import { setCredentials } from 'slices/authSlice';
@@ -11,12 +14,12 @@ import { setCredentials } from 'slices/authSlice';
 export default function SignIn() {
   const dispatch = useDispatch();
   const router = useRouter();
-  const [login, { isLoading }] = useLoginMutation();
-
+  const [login, { isLoading, error }] = useLoginMutation();
+  console.info('errors', error);
   const {
     control,
     handleSubmit,
-    formState: { errors }
+    formState: {}
   } = useForm({
     defaultValues: {
       email: 'frantz@videogift.com',
@@ -36,73 +39,70 @@ export default function SignIn() {
         router.replace('/(drawer)/home');
         // alert(JSON.stringify(result.data));
       }
+
+      console.info('result', result);
     } catch (e) {
-      alert(e);
+      console.info('e', e);
+      // alert(e);
     }
   };
 
   return (
     <View flex bg-bgColor>
-      <ScrollView contentInsetAdjustmentBehavior="always">
+      <ScrollView
+        contentInsetAdjustmentBehavior="always"
+        style={{ position: 'relative' }}
+      >
         <View>
-          <View flex centerH marginT-30>
-            <Text text50>VideoGift Client Login</Text>
-
-            <Text grey30 marginT-4>
-              Organization
-            </Text>
-          </View>
-
-          <View marginT-s6 centerH>
-            <View
-              paddingH-s4
-              marginV-s10
-              style={{
-                width: 300,
-                borderWidth: 1,
-                borderColor: Colors.grey50,
-                borderRadius: 12
+          <StandardContainer style={{ marginTop: 177 }}>
+            <Title>Log In</Title>
+          </StandardContainer>
+          {error?.data?.message ? (
+            <StandardContainer>
+              <ErrorAlert title="Error">{error?.data?.message}</ErrorAlert>
+            </StandardContainer>
+          ) : null}
+          <StandardContainer>
+            <TextInput
+              control={control}
+              rules={{ required: 'Email is required' }}
+              name="email"
+              label="Email"
+              placeholder="Email"
+              textInputProps={{
+                autoCapitalize: 'none',
+                keyboardType: 'email-address',
+                autoCorrect: false
               }}
-            >
-              <View paddingH-s3 paddingV-s2 marginV-s4>
-                <CustomTextInput
-                  control={control}
-                  rules={{ required: 'Email is required' }}
-                  name="email"
-                  placeholder="Email"
-                  textInputProps={{
-                    autoCapitalize: 'none',
-                    keyboardType: 'email-address',
-                    autoCorrect: false
-                  }}
-                />
-              </View>
+            />
 
-              <View centerH>
-                <View height={1} bg-grey50 style={{ width: '100%' }} />
-              </View>
-
-              <View paddingH-s3 paddingV-s2 marginV-s4>
-                <CustomTextInput
-                  control={control}
-                  name="password"
-                  rules={{
-                    required: 'Password is required',
-                    minLength: {
-                      value: 6,
-                      message: 'Password should be a min of 6 characters'
-                    }
-                  }}
-                  placeholder="Password"
-                  secureTextEntry
-                />
-              </View>
-            </View>
-
-            <BButton label="Login" onPress={handleSubmit(onSubmit)} />
-          </View>
+            <TextInput
+              control={control}
+              label="Password"
+              name="password"
+              rules={{
+                required: 'Password is required',
+                minLength: {
+                  value: 6,
+                  message: 'Password should be a min of 6 characters'
+                }
+              }}
+              placeholder="Password"
+              secureTextEntry
+            />
+          </StandardContainer>
+          <StandardContainer>
+            <PrimaryButton onPress={handleSubmit(onSubmit)} label="Log In" />
+          </StandardContainer>
         </View>
       </ScrollView>
+      <Image
+        style={{
+          bottom: 0,
+          position: 'absolute'
+        }}
+        source={require('../../assets/images/LoginImage.png')}
+      />
     </View>
   );
 }
