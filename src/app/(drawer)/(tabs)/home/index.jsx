@@ -1,98 +1,26 @@
-import FontAwesome from '@expo/vector-icons/FontAwesome';
+import { Ionicons } from '@expo/vector-icons';
 import { DrawerToggleButton } from '@react-navigation/drawer';
 import { OrderItemCard } from 'components/ui/Cards';
 import { Group } from 'components/ui/Group';
+import { PrimaryButton } from 'components/ui/PrimaryButton';
 import { StandardContainer } from 'components/ui/StandardContainer';
 import { StatCard } from 'components/ui/StatCard';
 import { SectionTitle } from 'components/ui/Title';
-import { ResizeMode, Video } from 'expo-av';
 import { router } from 'expo-router';
 import { Drawer } from 'expo-router/drawer';
-import { ScrollView, StyleSheet } from 'react-native';
+import { ScrollView, SectionList, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import {
-  Avatar,
-  BorderRadiuses,
-  Button,
-  Colors,
-  GridList,
-  LoaderScreen,
-  Spacings,
-  Text,
-  View
-} from 'react-native-ui-lib';
-import { useGetVideoGiftQuery } from 'services/videoGiftApi';
-
-const Item = ({ item, index }) => {
-  return (
-    <View flex margin-10 bg-grey70 padding-10>
-      <View flex-1>
-        <Text>{item.title}</Text>
-      </View>
-      <View flex-1>
-        <Text text100>Video Experience</Text>
-      </View>
-      <View flex-1>
-        <Video
-          isMuted
-          // ref={video}
-          style={styles.video}
-          source={{
-            uri: ''
-          }}
-          shouldPlay
-          useNativeControls
-          resizeMode={ResizeMode.CONTAIN}
-          isLooping
-          // onPlaybackStatusUpdate={(status) => setStatus(() => status)}
-        />
-      </View>
-      <View flex flex-1 row spread marginT-10>
-        <Button
-          flex-1
-          label="New Order"
-          size={Button.sizes.small}
-          backgroundColor={Colors.blue10}
-          onPress={() => {
-            router.push({
-              pathname: '(drawer)/(tabs)/home/create-order',
-              params: { videoGiftId: item.id }
-            });
-          }}
-        />
-
-        <View flex-1 />
-      </View>
-    </View>
-  );
-};
-
-export default function Index() {
-  const { data: videogifts, isLoading } = useGetVideoGiftQuery();
-
-  if (isLoading) return <LoaderScreen message="Loading" overlay />;
-
+import { Avatar, BorderRadiuses, Spacings, View } from 'react-native-ui-lib';
+import { useGetOrdersQuery } from 'services/ordersApi';
+const Header = () => {
   return (
     <>
-      <Drawer.Screen
-        options={{
-          title: 'Home',
-          headerShown: false,
-          headerLeft: () => <DrawerToggleButton />
-        }}
-      />
       <View style={styles.topContainer}>
         <SafeAreaView style={{ flex: 1 }}>
           <StandardContainer>
             <Group>
               <Avatar label="frantz" />
-              <FontAwesome.Button
-                name="facebook"
-                backgroundColor="#3b5998"
-                // onPress={loginWithFacebook}
-              >
-                Login with Facebook
-              </FontAwesome.Button>
+              <Ionicons name="notifications-outline" size={32} color="white" />
             </Group>
           </StandardContainer>
           <View style={{ paddingLeft: 10, marginTop: 15 }}>
@@ -121,41 +49,120 @@ export default function Index() {
         </SafeAreaView>
       </View>
       <StandardContainer>
-        <SectionTitle>In Progress Orders</SectionTitle>
-      </StandardContainer>
-      <StandardContainer>
-        <OrderItemCard
-          date="Sunday, 08 sep 23"
-          title="Happy Birthday"
-          name="Frantz"
-          email="artyfrantz@gmail.com"
-        />
-        <OrderItemCard
-          date="Sunday, 08 sep 23"
-          title="Retirement Party"
-          name="LJ Li"
-          email="liejian@gmail.com"
+        <PrimaryButton
+          onPress={() => router.push('(drawer)/(tabs)/home/create-order')}
+          label="Create Order"
         />
       </StandardContainer>
-      <StandardContainer>
-        <SectionTitle>Completed Orders</SectionTitle>
-      </StandardContainer>
-      <StandardContainer>
-        <OrderItemCard
-          date="Sunday, 08 sep 23"
-          title="Happy Birthday"
-          name="Frantz"
-          email="artyfrantz@gmail.com"
-        />
-        <OrderItemCard
-          date="Sunday, 08 sep 23"
-          title="Happy Birthday"
-          name="Frantz"
-          email="artyfrantz@gmail.com"
-        />
-      </StandardContainer>
+    </>
+  );
+};
+function groupByOrderStatus(inputData) {
+  const groupedData = {};
+
+  inputData.forEach((item) => {
+    const orderStatus = item.orderStatus;
+
+    // Map "NEW" and "GENERATING_FINAL_VIDEO" to "In Progress"
+    const updatedOrderStatus =
+      orderStatus === 'NEW' || orderStatus === 'GENERATING_FINAL_VIDEO'
+        ? 'In Progress'
+        : orderStatus;
+
+    if (!groupedData[updatedOrderStatus]) {
+      groupedData[updatedOrderStatus] = [];
+    }
+
+    groupedData[updatedOrderStatus].push(item);
+  });
+
+  // Create an array of objects with "title" and "data" properties
+  const result = Object.keys(groupedData).map((orderStatus) => ({
+    title: orderStatus,
+    data: groupedData[orderStatus]
+  }));
+
+  // Define the custom order for sorting
+  const customOrder = ['In Progress', 'COMPLETED'];
+
+  // Sort the result array based on the custom order
+  result.sort((a, b) => {
+    const indexA = customOrder.indexOf(a.title);
+    const indexB = customOrder.indexOf(b.title);
+    return indexA - indexB;
+  });
+
+  return result;
+}
+function formatDate(inputDate) {
+  const options = {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  };
+  const date = new Date(inputDate);
+  return date.toLocaleDateString('en-US', options);
+}
+
+export default function Index() {
+  // const { data: videogifts, isLoading } = useGetVideoGiftQuery();
+
+  const { data: orders, isLoading, isFetching, refetch } = useGetOrdersQuery();
+  // console.info('orders', orders);
+  // if (isLoading) return <LoaderScreen message="Loading" overlay />;
+
+  const groupedByOrderStatus = groupByOrderStatus(orders || []);
+  console.info('groupedByOrderStatus', groupedByOrderStatus);
+  return (
+    <>
+      <Drawer.Screen
+        options={{
+          title: 'Home',
+          headerShown: false,
+          headerLeft: () => <DrawerToggleButton />
+        }}
+      />
+
+      <SectionList
+        contentInsetAdjustmentBehavior="never"
+        sections={groupedByOrderStatus}
+        ListHeaderComponent={Header}
+        keyExtractor={(item, index) => item + index}
+        onRefresh={() => {
+          refetch();
+        }}
+        refreshing={isLoading || isFetching}
+        renderItem={({ item }) => (
+          <OrderItemCard
+            date={formatDate(item.createdAt)}
+            title={item.title}
+            name="Frantz"
+            email="artyfrantz@gmail.com"
+            onPress={() => {
+              router.push({
+                pathname: '/(drawer)/home/videogift-details',
+                params: { videoGiftId: item.id }
+              });
+            }}
+          />
+        )}
+        renderSectionHeader={({ section: { title } }) => (
+          <View
+            style={{
+              margin: 0,
+              // marginTop: 40,
+              padding: 20,
+              backgroundColor: 'white'
+            }}
+          >
+            <SectionTitle>{title}</SectionTitle>
+          </View>
+        )}
+      />
+
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <GridList
+        {/* <GridList
           ListHeaderComponent={
             <Text h1 marginB-s5>
               GridList
@@ -169,7 +176,7 @@ export default function Index() {
           listPadding={Spacings.s5}
           // keepItemSize
           contentContainerStyle={styles.list}
-        />
+        /> */}
       </View>
     </>
   );

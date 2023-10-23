@@ -1,18 +1,20 @@
-import { CustomSelect } from 'components/customSelect';
-import { CustomTextInput } from 'components/customTextInput';
+import { KeyboardAvoidingWrapper } from 'components/ui/KeyboardAvoidingWrapper';
+import { LoaderView } from 'components/ui/LoaderView';
+import { PrimaryButton } from 'components/ui/PrimaryButton';
+import { StandardContainer } from 'components/ui/StandardContainer';
+import { SectionTitle } from 'components/ui/Title';
+import { SelectInput } from 'components/ui/form/SelectInput';
+import { TextInput } from 'components/ui/form/TextInput';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import _ from 'lodash';
 import { useForm } from 'react-hook-form';
-import { ScrollView, View } from 'react-native';
-import {
-  Button,
-  Colors,
-  LoaderScreen,
-  Spacings,
-  Text
-} from 'react-native-ui-lib';
+import { View } from 'react-native';
+import { useGetOccasionsQuery } from 'services/occasionsApi';
 import { useCreateVideoGiftOrderMutation } from 'services/ordersApi';
-import { useSearchOrganizationUsersQuery } from 'services/organizationApi';
+import {
+  useGetVideoGiftExperiencesQuery,
+  useSearchOrganizationUsersQuery
+} from 'services/organizationApi';
 
 export default function CreateCustomerScreen() {
   const searchParams = useLocalSearchParams();
@@ -21,14 +23,20 @@ export default function CreateCustomerScreen() {
 
   const [createOrder, { isLoading: isCreateLoading }] =
     useCreateVideoGiftOrderMutation();
+  const { data: experiences, isLoading: isLoadingExperiences } =
+    useGetVideoGiftExperiencesQuery({});
   const { data: users, isLoading } = useSearchOrganizationUsersQuery({});
-
+  const { data: occasions, isLoading: isLoadingOccasion } =
+    useGetOccasionsQuery({});
+  console.info('occasions', occasions);
   const { control, handleSubmit } = useForm({
     defaultValues: {
-      id: searchParams?.videoGiftId,
+      parentVideoGiftId: searchParams?.videoGiftId,
       name: '',
       phone: '',
       email: '',
+      occasionId: '',
+      customerPrice: '',
       assignedToOrganizationMemberId: ''
     }
   });
@@ -41,7 +49,10 @@ export default function CreateCustomerScreen() {
       console.info('data 11', result);
       if (result.data) {
         // dispatch(setCredentials(result.data));
-        router.replace('/(drawer)/home');
+        router.replace({
+          pathname: '/(drawer)/home/videogift-details',
+          params: { videoGiftId: result.data.videoGift.id }
+        });
         // alert(JSON.stringify(result.data));
       }
     } catch (e) {
@@ -49,102 +60,160 @@ export default function CreateCustomerScreen() {
     }
   };
 
-  if (isLoading && isCreateLoading)
-    return <LoaderScreen message="Loading" overlay />;
-
   return (
-    <View
-      style={{
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'stretch',
-        padding: Spacings.s5,
-        width: '100%'
-      }}
+    <LoaderView
+      isLoading={
+        isLoading ||
+        isLoadingOccasion ||
+        isLoadingExperiences ||
+        isCreateLoading
+      }
     >
-      <Stack.Screen options={{ headerShown: true, title: 'Create Order' }} />
-
-      <ScrollView contentInsetAdjustmentBehavior="always">
+      <KeyboardAvoidingWrapper>
         <View
           style={{
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'stretch',
+
             width: '100%'
           }}
         >
-          <View flex centerH marginT-30>
-            <Text text50>Create Order</Text>
-          </View>
+          <Stack.Screen
+            options={{ headerShown: true, title: 'Create Order' }}
+          />
 
-          <View
-            style={{
-              width: '100%'
-            }}
-          >
-            <View style={{}}>
-              <View paddingH-s3 paddingV-s2 marginV-s4>
-                <CustomTextInput
-                  control={control}
-                  rules={{ required: 'Name is required' }}
-                  name="name"
-                  placeholder="Name"
-                  textInputProps={{
-                    label: 'Name',
-                    // autoCapitalize: 'none',
-                    // keyboardType: '',
-                    autoCorrect: false
-                  }}
-                />
-              </View>
-              <View paddingH-s3 paddingV-s2 marginV-s4>
-                <CustomTextInput
-                  control={control}
-                  rules={{ required: 'Email is required' }}
-                  name="email"
-                  placeholder="Email"
-                  textInputProps={{
-                    label: 'Email',
-                    autoCapitalize: 'none',
-                    keyboardType: 'email-address',
-                    autoCorrect: false
-                  }}
-                />
-              </View>
-
-              <View paddingH-s3 paddingV-s2 marginV-s4>
-                <CustomTextInput
-                  control={control}
-                  name="phone"
-                  rules={{
-                    required: 'Phone is required'
-                  }}
-                  placeholder="Phone"
-                  textInputProps={{ label: 'Phone' }}
-                />
-              </View>
-              <View paddingH-s3 paddingV-s2 marginV-s4>
-                <CustomSelect
-                  items={_.map(users, (user) => ({
-                    value: user.id,
-                    label: `${user.name} (${user.role})`
-                  }))}
-                  control={control}
-                  name="assignedToOrganizationMemberId"
-                  rules={{
-                    required: 'Assigned To is required'
-                  }}
-                  placeholder="User"
-                  inputProps={{ label: 'Assigned To' }}
-                />
-              </View>
-            </View>
-
-            <Button
-              backgroundColor={Colors.green10}
-              label="Create Customer"
+          <StandardContainer>
+            <SectionTitle>Create Order</SectionTitle>
+          </StandardContainer>
+          <StandardContainer>
+            <SelectInput
+              items={_.map(experiences, (data) => ({
+                value: data.id,
+                label: `${data.title}`
+              }))}
+              label="VideoGift Expericence"
+              control={control}
+              name="parentVideoGiftId"
+              rules={{
+                required: 'Video Gift Experience is required'
+              }}
+              placeholder="Select VideoGift Experience"
+              textInputProps={{
+                returnKeyType: 'next'
+              }}
+              // inputProps={{ label: 'Assigned To' }}
+            />
+            <TextInput
+              control={control}
+              rules={{ required: 'Name is required' }}
+              name="name"
+              label="Customer Name"
+              placeholder="Name"
+              textInputProps={{
+                returnKeyType: 'next',
+                // autoCapitalize: '',
+                // keyboardType: 'email-address',
+                autoCorrect: false
+              }}
+            />
+            <TextInput
+              control={control}
+              rules={{
+                required: 'Email is required',
+                pattern: {
+                  value: /\S+@\S+\.\S+/,
+                  message: 'Entered value does not match email format'
+                }
+              }}
+              name="email"
+              label="Customer Email"
+              placeholder="Email"
+              textInputProps={{
+                // label: 'Email',
+                returnKeyType: 'next',
+                autoCapitalize: 'none',
+                inputMode: 'email',
+                autoCorrect: false
+              }}
+            />
+            <TextInput
+              control={control}
+              name="phone"
+              label="Customer Phone"
+              rules={{
+                required: 'Phone is required'
+              }}
+              placeholder="Phone"
+              textInputProps={{ returnKeyType: 'next', inputMode: 'tel' }}
+            />
+            <SelectInput
+              items={_.map(occasions?.data, (occasion) => ({
+                value: occasion.id,
+                label: `${occasion.name}`
+              }))}
+              label="Occasion"
+              control={control}
+              name="occasionId"
+              rules={{
+                required: 'Occasion is required'
+              }}
+              placeholder="Occasion"
+              textInputProps={{ returnKeyType: 'next' }}
+              // inputProps={{ label: 'Assigned To' }}
+            />
+            <TextInput
+              control={control}
+              name="title"
+              label="Occasion Title"
+              rules={{
+                required: 'Title is required'
+              }}
+              placeholder="Happy Birthday Gigi!"
+              textInputProps={{ returnKeyType: 'next' }}
+              // textInputProps={{ label: 'Phone' }}
+            />
+            <SelectInput
+              items={_.map(users, (user) => ({
+                value: user.id,
+                label: `${user.name} (${user.role})`
+              }))}
+              label="Assigned To"
+              control={control}
+              name="assignedToOrganizationMemberId"
+              rules={{
+                required: 'Assigned To is required'
+              }}
+              placeholder="User"
+              // inputProps={{ label: 'Assigned To' }}
+            />
+            <TextInput
+              control={control}
+              rules={{
+                required: 'Customer price is required'
+              }}
+              name="customerPrice"
+              label="Customer Price"
+              placeholder="50.00"
+              textInputProps={{
+                // label: 'Email',
+                autoCapitalize: 'none',
+                inputMode: 'decimal',
+                autoCorrect: false,
+                returnKeyType: 'next',
+                onSubmitEditing: () => {},
+                blurOnSubmit: false
+              }}
+            />
+          </StandardContainer>
+          <StandardContainer>
+            <PrimaryButton
+              label="Create Order"
               onPress={handleSubmit(onSubmit)}
             />
-          </View>
+          </StandardContainer>
         </View>
-      </ScrollView>
-    </View>
+      </KeyboardAvoidingWrapper>
+    </LoaderView>
   );
 }

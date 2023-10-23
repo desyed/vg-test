@@ -11,11 +11,11 @@ const ordersApi = rootApi.injectEndpoints({
     }),
     createVideoGiftOrder: builder.mutation({
       query: (payload) => ({
-        url: `/videogift/${payload.id}/order`,
+        url: `/videogift/${payload.parentVideoGiftId}/order`,
         method: 'POST',
         body: payload
-      }),
-      invalidatesTags: ['Customers']
+      })
+      // invalidatesTags: ['Orders']
     })
   }),
   overrideExisting: false

@@ -9,6 +9,19 @@ const videoGiftApi = rootApi.injectEndpoints({
         body: credentials
       })
     }),
+    getVideoGiftById: builder.query({
+      query: ({ videoGiftId }) => ({
+        url: `/videogift/${videoGiftId}`,
+        method: 'GET'
+      })
+    }),
+    getAllVideoGiftParents: builder.query({
+      query: (credentials) => ({
+        url: '/videogift',
+        method: 'GET',
+        body: credentials
+      })
+    }),
     generatePreview: builder.mutation({
       query: (payload) => ({
         url: '/videogift/output',
@@ -20,5 +33,8 @@ const videoGiftApi = rootApi.injectEndpoints({
   overrideExisting: false
 });
 
-export const { useGetVideoGiftQuery, useGeneratePreviewMutation } =
-  videoGiftApi;
+export const {
+  useGetVideoGiftQuery,
+  useGeneratePreviewMutation,
+  useGetVideoGiftByIdQuery
+} = videoGiftApi;

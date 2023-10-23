@@ -9,10 +9,11 @@ const styles = StyleSheet.create({
   }
 });
 
-export const PrimaryButton = ({ style = {}, ...props }) => (
+export const PrimaryButton = ({ style = {}, label, ...props }) => (
   <Button
     size={Button.sizes.large}
     style={[styles.button, style]}
+    label={label}
     {...props}
     backgroundColor="#EF6800"
   />

@@ -1,4 +1,5 @@
 import { StyleSheet, Text } from 'react-native';
+import { TouchableOpacity } from 'react-native-gesture-handler';
 import { View } from 'react-native-ui-lib';
 
 const styles = StyleSheet.create({
@@ -63,12 +64,21 @@ const styles = StyleSheet.create({
   }
 });
 
-export const OrderItemCard = ({ children, date, title, name, email }) => (
-  <View style={[styles.container]}>
-    <View style={styles.bar} />
-    <Text style={[styles.date]}>{date}</Text>
-    <Text style={[styles.title]}>{title}</Text>
-    <Text style={[styles.name]}>{name}</Text>
-    <Text style={[styles.email]}>{email}</Text>
-  </View>
+export const OrderItemCard = ({
+  children,
+  date,
+  title,
+  name,
+  email,
+  onPress
+}) => (
+  <TouchableOpacity onPress={onPress}>
+    <View style={[styles.container]}>
+      <View style={styles.bar} />
+      <Text style={[styles.date]}>{date}</Text>
+      <Text style={[styles.title]}>{title}</Text>
+      <Text style={[styles.name]}>{name}</Text>
+      <Text style={[styles.email]}>{email}</Text>
+    </View>
+  </TouchableOpacity>
 );

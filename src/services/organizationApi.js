@@ -7,9 +7,18 @@ const organizationApi = rootApi.injectEndpoints({
         url: '/organization/users',
         method: 'GET'
       })
+    }),
+    getVideoGiftExperiences: builder.query({
+      query: (credentials) => ({
+        url: '/organization/videogifts',
+        method: 'GET'
+      })
     })
   }),
   overrideExisting: false
 });
 
-export const { useSearchOrganizationUsersQuery } = organizationApi;
+export const {
+  useSearchOrganizationUsersQuery,
+  useGetVideoGiftExperiencesQuery
+} = organizationApi;
