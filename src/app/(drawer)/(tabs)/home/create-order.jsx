@@ -28,7 +28,7 @@ export default function CreateCustomerScreen() {
   const { data: users, isLoading } = useSearchOrganizationUsersQuery({});
   const { data: occasions, isLoading: isLoadingOccasion } =
     useGetOccasionsQuery({});
-  console.info('occasions', occasions);
+
   const { control, handleSubmit } = useForm({
     defaultValues: {
       parentVideoGiftId: searchParams?.videoGiftId,
@@ -42,13 +42,9 @@ export default function CreateCustomerScreen() {
   });
 
   const onSubmit = async (data) => {
-    console.info('data', data);
-
     try {
       const result = await createOrder(data);
-      console.info('data 11', result);
       if (result.data) {
-        // dispatch(setCredentials(result.data));
         router.replace({
           pathname: '/(drawer)/home/videogift-details',
           params: { videoGiftId: result.data.videoGift.id }

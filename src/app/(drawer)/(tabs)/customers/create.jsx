@@ -21,12 +21,9 @@ export default function CreateCustomerScreen() {
   });
 
   const onSubmit = async (data) => {
-    console.info('data', data);
-
     try {
       //   const result = await login(data);
       //   if (result.data) {
-      //     dispatch(setCredentials(result.data));
       //     router.replace('/(drawer)/home');
       //     // alert(JSON.stringify(result.data));
       //   }

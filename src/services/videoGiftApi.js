@@ -36,5 +36,6 @@ const videoGiftApi = rootApi.injectEndpoints({
 export const {
   useGetVideoGiftQuery,
   useGeneratePreviewMutation,
-  useGetVideoGiftByIdQuery
+  useGetVideoGiftByIdQuery,
+  useLazyGetVideoGiftByIdQuery
 } = videoGiftApi;

@@ -51,7 +51,6 @@ export default function Index() {
     refetch,
     isFetching
   } = useGetCustomersQuery();
-  console.info('customers', customers?.data);
 
   const keyExtractor = (item) => item.id;
 

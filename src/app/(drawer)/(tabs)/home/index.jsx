@@ -113,7 +113,7 @@ export default function Index() {
   // if (isLoading) return <LoaderScreen message="Loading" overlay />;
 
   const groupedByOrderStatus = groupByOrderStatus(orders || []);
-  console.info('groupedByOrderStatus', groupedByOrderStatus);
+
   return (
     <>
       <Drawer.Screen

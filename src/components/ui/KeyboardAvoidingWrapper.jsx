@@ -5,6 +5,7 @@ export const KeyboardAvoidingWrapper = ({ children }) => {
     <KeyboardAwareScrollView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={{ flex: 1 }}
+      scrollEnabled={false}
       //   contentContainerStyle={{ paddingBottom: 100 }}
     >
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>

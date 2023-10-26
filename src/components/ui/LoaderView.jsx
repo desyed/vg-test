@@ -1,7 +1,7 @@
 import { LoaderScreen, View } from 'react-native-ui-lib';
 
 export const LoaderView = ({ children, isLoading, style = {} }) => (
-  <View style={{ flex: 1, position: 'relative' }}>
+  <View style={{ flex: 1, position: 'relative', backgroundColor: 'white' }}>
     {isLoading ? (
       <LoaderScreen
         overlay

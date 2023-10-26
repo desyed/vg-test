@@ -27,10 +27,10 @@ export const connectPusher = async (user) => {
   await pusher.subscribe({
     channelName: user?.selectedOrganizationId,
     onEvent: (event) => {
+      console.log(`Got channel event: ${event}`);
       if (event.eventName === 'videoGiftPreviewUpdated') {
         store.dispatch(
           rootApi.util.updateQueryData('getOrders', undefined, (oldData) => {
-            console.info('oldData', oldData);
             return oldData?.map((order) => {
               if (order.id === event.data.videoGift?.id) {
                 return {
@@ -44,6 +44,23 @@ export const connectPusher = async (user) => {
               return order;
             });
           })
+        );
+
+        store.dispatch(
+          rootApi.util.upsertQueryData(
+            'getVideoGiftById',
+            { videoGiftId: event.data.videoGift?.videoGiftId },
+            (oldData) => {
+              console.info('oldData: getVideoGiftById', oldData);
+              return {
+                ...oldData,
+                videoGift: {
+                  ...oldData?.videoGift,
+                  signedPreviewUrl: event.data.videoGift?.signedUrl
+                }
+              };
+            }
+          )
         );
       }
       console.log(`Got channel event: ${event}`);

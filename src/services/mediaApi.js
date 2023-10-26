@@ -1,5 +1,6 @@
-import { rootApi } from './rootApi';
+import { omit, pick } from 'lodash';
 
+import { rootApi } from './rootApi';
 const awsApi = rootApi.injectEndpoints({
   endpoints: (builder) => ({
     createMedia: builder.mutation({
@@ -12,6 +13,51 @@ const awsApi = rootApi.injectEndpoints({
           videoGiftId: payload.videoGiftId,
           type: payload.type,
           participantId: payload.participantId
+        }
+      })
+    }),
+
+    patchMedia: builder.mutation({
+      query: (payload) => ({
+        url: `/media/${payload.mediaId}`,
+        method: 'PUT',
+        body: {
+          ...omit(payload, ['mediaId'])
+        }
+      })
+    }),
+
+    getSelectedMedia: builder.query({
+      query: (payload) => ({
+        url: '/media/selected',
+        method: 'GET',
+        params: {
+          videoGiftId: payload.videoGiftId
+        }
+      })
+    }),
+    getMediaById: builder.query({
+      query: (payload) => ({
+        url: `/media/${payload.mediaId}`,
+        method: 'GET'
+      })
+    }),
+    getSelectedMediaById: builder.query({
+      query: (payload) => ({
+        url: `/selectedMedia`,
+        method: 'GET',
+        params: {
+          selectedMediaId: payload.selectedMediaId
+        }
+      })
+    }),
+    patchSelectedMedia: builder.mutation({
+      query: (payload) => ({
+        url: `/selectedMedia`,
+        method: 'PATCH',
+
+        body: {
+          ...pick(payload, ['title', 'subTitle', 'selectedMediaId'])
         }
       })
     }),
@@ -30,4 +76,12 @@ const awsApi = rootApi.injectEndpoints({
   overrideExisting: false
 });
 
-export const { useCreateMediaMutation, useSelectMediaMutation } = awsApi;
+export const {
+  useCreateMediaMutation,
+  useSelectMediaMutation,
+  useGetSelectedMediaQuery,
+  useGetMediaByIdQuery,
+  useGetSelectedMediaByIdQuery,
+  usePatchSelectedMediaMutation,
+  usePatchMediaMutation
+} = awsApi;
