@@ -46,22 +46,10 @@ export const connectPusher = async (user) => {
           })
         );
 
-        store.dispatch(
-          rootApi.util.upsertQueryData(
-            'getVideoGiftById',
-            { videoGiftId: event.data.videoGift?.videoGiftId },
-            (oldData) => {
-              console.info('oldData: getVideoGiftById', oldData);
-              return {
-                ...oldData,
-                videoGift: {
-                  ...oldData?.videoGift,
-                  signedPreviewUrl: event.data.videoGift?.signedUrl
-                }
-              };
-            }
-          )
-        );
+        store.dispatch(rootApi.util.invalidateTags(['VideoGifts']));
+      }
+      if (event.eventName === 'mediaUpdated') {
+        store.dispatch(rootApi.util.invalidateTags(['SelectedMedia']));
       }
       console.log(`Got channel event: ${event}`);
     }

@@ -2,26 +2,14 @@ import { rootApi } from './rootApi';
 
 const videoGiftApi = rootApi.injectEndpoints({
   endpoints: (builder) => ({
-    getVideoGift: builder.query({
-      query: (credentials) => ({
-        url: '/videogift',
-        method: 'GET',
-        body: credentials
-      })
-    }),
     getVideoGiftById: builder.query({
-      query: ({ videoGiftId }) => ({
+      query: (videoGiftId) => ({
         url: `/videogift/${videoGiftId}`,
         method: 'GET'
-      })
+      }),
+      providesTags: ['VideoGifts']
     }),
-    getAllVideoGiftParents: builder.query({
-      query: (credentials) => ({
-        url: '/videogift',
-        method: 'GET',
-        body: credentials
-      })
-    }),
+
     generatePreview: builder.mutation({
       query: (payload) => ({
         url: '/videogift/output',
@@ -34,7 +22,6 @@ const videoGiftApi = rootApi.injectEndpoints({
 });
 
 export const {
-  useGetVideoGiftQuery,
   useGeneratePreviewMutation,
   useGetVideoGiftByIdQuery,
   useLazyGetVideoGiftByIdQuery

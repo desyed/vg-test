@@ -6,20 +6,42 @@ import { PrimaryButton } from 'components/ui/PrimaryButton';
 import { StandardContainer } from 'components/ui/StandardContainer';
 import { StatCard } from 'components/ui/StatCard';
 import { SectionTitle } from 'components/ui/Title';
-import { router } from 'expo-router';
+import { router, useNavigation } from 'expo-router';
 import { Drawer } from 'expo-router/drawer';
 import { ScrollView, SectionList, StyleSheet } from 'react-native';
+import { TouchableOpacity } from 'react-native-gesture-handler';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Avatar, BorderRadiuses, Spacings, View } from 'react-native-ui-lib';
 import { useGetOrdersQuery } from 'services/ordersApi';
+import { useGetMeQuery } from 'services/userApi';
+function getInitials(name) {
+  // Check if name is null or not a string, return empty string if true
+  if (typeof name !== 'string' || name === null) {
+    return '';
+  }
+  // Remove any extra spaces and split the name into parts
+  const nameParts = name.trim().split(/\s+/);
+  // Get the first letter of each part of the name
+  const initials = nameParts.map((part) => part[0].toUpperCase()).join('');
+  return initials;
+}
+
 const Header = () => {
+  const navigation = useNavigation();
+  const { data: dataMe } = useGetMeQuery();
   return (
     <>
       <View style={styles.topContainer}>
         <SafeAreaView style={{ flex: 1 }}>
           <StandardContainer>
             <Group>
-              <Avatar label="frantz" />
+              <TouchableOpacity
+                onPress={() => {
+                  navigation.toggleDrawer();
+                }}
+              >
+                <Avatar label={getInitials(dataMe?.name)} />
+              </TouchableOpacity>
               <Ionicons name="notifications-outline" size={32} color="white" />
             </Group>
           </StandardContainer>
@@ -106,8 +128,6 @@ function formatDate(inputDate) {
 }
 
 export default function Index() {
-  // const { data: videogifts, isLoading } = useGetVideoGiftQuery();
-
   const { data: orders, isLoading, isFetching, refetch } = useGetOrdersQuery();
   // console.info('orders', orders);
   // if (isLoading) return <LoaderScreen message="Loading" overlay />;

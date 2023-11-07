@@ -15,7 +15,7 @@ export default function SignIn() {
   const dispatch = useDispatch();
   const router = useRouter();
   const [login, { isLoading, error }] = useLoginMutation();
-  console.info('errors', error);
+
   const {
     control,
     handleSubmit,

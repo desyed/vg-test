@@ -28,6 +28,13 @@ const awsApi = rootApi.injectEndpoints({
     }),
 
     getSelectedMedia: builder.query({
+      providesTags: (result, error, arg) =>
+        result
+          ? [
+              ...result.map(({ id }) => ({ type: 'SelectedMedia', id })),
+              'SelectedMedia'
+            ]
+          : ['SelectedMedia'],
       query: (payload) => ({
         url: '/media/selected',
         method: 'GET',
@@ -48,6 +55,20 @@ const awsApi = rootApi.injectEndpoints({
         method: 'GET',
         params: {
           selectedMediaId: payload.selectedMediaId
+        }
+      })
+    }),
+    moveSelectedMediaOrder: builder.mutation({
+      invalidatesTags: (result, error, arg) => [
+        { type: 'SelectedMedia', id: arg.selectedMediaId },
+        'SelectedMedia'
+      ],
+      query: ({ videoGiftId, selectedMedia }) => ({
+        url: '/media/selected',
+        method: 'PATCH',
+        body: {
+          videoGiftId,
+          selectedMedia
         }
       })
     }),
@@ -83,5 +104,6 @@ export const {
   useGetMediaByIdQuery,
   useGetSelectedMediaByIdQuery,
   usePatchSelectedMediaMutation,
+  useMoveSelectedMediaOrderMutation,
   usePatchMediaMutation
 } = awsApi;

@@ -10,25 +10,49 @@ import {
   useLocalSearchParams,
   useRouter
 } from 'expo-router';
+// import * as ScreenOrientation from 'expo-screen-orientation';
 import { useEffect, useRef, useState } from 'react';
 import { Dimensions, StyleSheet, View } from 'react-native';
 import DraggableFlatList, {
   ScaleDecorator
 } from 'react-native-draggable-flatlist';
 import { ScrollView } from 'react-native-gesture-handler';
-import { ActionSheet, Text, TouchableOpacity } from 'react-native-ui-lib';
-import { useGetSelectedMediaQuery } from 'services/mediaApi';
+import {
+  ActionSheet,
+  Image,
+  Text,
+  TouchableOpacity
+} from 'react-native-ui-lib';
+import {
+  useGetSelectedMediaQuery,
+  useMoveSelectedMediaOrderMutation
+} from 'services/mediaApi';
 import {
   useGeneratePreviewMutation,
   useGetVideoGiftByIdQuery
 } from 'services/videoGiftApi';
+
 const blurhash =
   '|rF?hV%2WCj[ayj[a|j[az_NaeWBj@ayfRayfQfQM{M|azj[azf6fQfQfQIpWXofj[ayj[j[fQayWCoeoeaya}j[ayfQa{oLj?j[WVj[ayayj[fQoff7azayj[ayj[j[ayofayayayj[fQj[ayayj[ayfjj[j[ayjuayj[';
 
 const PREVIEW_WIDTH = 120;
-const VideoPreview = ({ item, index, drag, isActive }) => {
+// async function changeScreenOrientationLandscape() {
+//   await ScreenOrientation.unlockAsync();
+//   await ScreenOrientation.lockAsync(
+//     ScreenOrientation.OrientationLock.LANDSCAPE_LEFT
+//   );
+// }
+// async function changeScreenOrientationPortrait() {
+//   await ScreenOrientation.unlockAsync();
+//   await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.DEFAULT);
+// }
+
+const VideoPreview = ({ item, index, drag, isActive, setSelectedVideo }) => {
   const video = useRef(null);
   const router = useRouter();
+  const [showVideo, setShowVideo] = useState(true);
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [status, setStatus] = useState({});
 
   return (
     <ScaleDecorator>
@@ -36,8 +60,7 @@ const VideoPreview = ({ item, index, drag, isActive }) => {
         <TouchableOpacity
           // activeOpacity={1}
           onPress={() => {
-            video.current.presentFullscreenPlayer();
-            video.current.playAsync();
+            setSelectedVideo({ videoUri: item?.hlsUrl });
           }}
           onLongPress={drag}
           // disabled={isActive}
@@ -50,33 +73,17 @@ const VideoPreview = ({ item, index, drag, isActive }) => {
             }
           ]}
         >
-          <Video
-            ref={video}
+          <Image
             style={{
-              alignSelf: 'center',
-              width: PREVIEW_WIDTH,
-              height: PREVIEW_WIDTH
-            }}
-            onError={(e) => {
-              console.info('error', e);
-            }}
-            source={{
-              uri: item?.hlsUrl
-            }}
-            posterSource={{
-              uri: item?.media?.previewImageUrl
-            }}
-            posterStyle={{
               objectFit: 'cover',
               width: PREVIEW_WIDTH,
               height: PREVIEW_WIDTH
             }}
-            usePoster
-            // shouldPlay
-            // useNativeControls
-            resizeMode={ResizeMode.COVER}
-            // onPlaybackStatusUpdate={(status) => setStatus(() => status)}
+            source={{
+              uri: `${item?.media?.previewImageUrl}`
+            }}
           />
+
           {/* <Text style={styles.text}>{item.id}</Text> */}
         </TouchableOpacity>
         <TouchableOpacity
@@ -116,19 +123,23 @@ const VideoPreview = ({ item, index, drag, isActive }) => {
 
 export default function VideoGiftDetailScreen() {
   const [data, setData] = useState([]);
+
+  const selectedVideoRef = useRef(null);
   const [showActionSheet, setShowActionSheet] = useState(false);
   const searchParams = useLocalSearchParams();
   const windowWidth = Dimensions.get('window').width;
   const videoPreviewFlatlist = useRef(null);
+
+  const [selectedVideo, setSelectedVideo] = useState({});
+
   const router = useRouter();
   const {
     data: videoGiftData,
     isLoading,
     refetch: refetchVideoGift
-  } = useGetVideoGiftByIdQuery({
-    videoGiftId: searchParams?.videoGiftId
-  });
+  } = useGetVideoGiftByIdQuery(searchParams?.videoGiftId);
 
+  const [triggerMoveSelectedMedia] = useMoveSelectedMediaOrderMutation();
   const [generatePreview] = useGeneratePreviewMutation();
   const {
     data: selectedMedia,
@@ -143,11 +154,13 @@ export default function VideoGiftDetailScreen() {
   }, [selectedMedia]);
 
   useFocusEffect(() => {
-    setTimeout(() => {
-      videoPreviewFlatlist.current?.scrollToEnd({ animated: true });
-    }, 1000);
+    // setTimeout(() => {
+    //   videoPreviewFlatlist.current?.scrollToEnd({ animated: true });
+    // }, 1000);
   });
 
+  const url = videoGiftData?.videoGift?.completedHLSUrl;
+  // console.info('url', url);
   return (
     <LoaderView isLoading={isLoading || selectMediaIsLoading}>
       <Stack.Screen
@@ -182,8 +195,10 @@ export default function VideoGiftDetailScreen() {
             width: '100%'
           }}
         >
-          {videoGiftData?.videoGift?.previewStatus === 'COMPLETED' &&
-          videoGiftData?.videoGift?.signedPreviewUrl?.url ? (
+          {(videoGiftData?.videoGift?.previewStatus === 'COMPLETED' &&
+            videoGiftData?.videoGift?.signedPreviewUrl?.url) ||
+          (videoGiftData?.videoGift?.completedVideoStatus === 'COMPLETED' &&
+            videoGiftData?.videoGift?.signedCompletedUrl?.url) ? (
             <Video
               // ref={video}
               style={{
@@ -192,12 +207,18 @@ export default function VideoGiftDetailScreen() {
                 height: 200
               }}
               source={{
-                uri: videoGiftData?.videoGift?.signedPreviewUrl?.url
+                uri: url || videoGiftData?.videoGift?.signedPreviewUrl?.url
               }}
               // shouldPlay
               useNativeControls
               resizeMode={ResizeMode.COVER}
-
+              onFullscreenUpdate={async (VideoFullscreenUpdateEvent) => {
+                if (VideoFullscreenUpdateEvent.fullscreenUpdate === 1) {
+                  // await changeScreenOrientationLandscape();
+                } else {
+                  // await changeScreenOrientationPortrait();
+                }
+              }}
               // onPlaybackStatusUpdate={(status) => setStatus(() => status)}
             />
           ) : (
@@ -221,25 +242,6 @@ export default function VideoGiftDetailScreen() {
               </Text>
             </View>
           )}
-          <StandardContainer>
-            <SectionTitle>{videoGiftData?.videoGift?.title}</SectionTitle>
-          </StandardContainer>
-          <DraggableFlatList
-            ref={videoPreviewFlatlist}
-            data={data || []}
-            horizontal
-            autoscrollThreshold={100}
-            onDragEnd={({ data }) => {
-              setData(data);
-            }}
-            keyExtractor={(item) => item.id}
-            renderItem={VideoPreview}
-            renderPlaceholder={() => (
-              <View style={{ flex: 1, backgroundColor: 'tomato' }} />
-            )}
-            // numColumns={3}
-          />
-
           <StandardContainer style={{ flex: 1, backgroundColor: '#fff' }}>
             <PrimaryButton
               label="Add Media"
@@ -251,6 +253,68 @@ export default function VideoGiftDetailScreen() {
               }}
             />
           </StandardContainer>
+          <StandardContainer>
+            <SectionTitle>{videoGiftData?.videoGift?.title}</SectionTitle>
+          </StandardContainer>
+          <DraggableFlatList
+            ref={videoPreviewFlatlist}
+            data={data || []}
+            horizontal
+            initialNumToRender={4}
+            autoscrollThreshold={100}
+            onDragEnd={({ data }) => {
+              setData(data);
+              triggerMoveSelectedMedia({
+                videoGiftId: searchParams?.videoGiftId,
+                selectedMedia: data.map((item, index) => {
+                  return { id: item.id, order: index };
+                })
+              });
+            }}
+            keyExtractor={(item) => item.id}
+            renderItem={({ item, index, drag, isActive }) => {
+              return (
+                <VideoPreview
+                  item={item}
+                  index={index}
+                  drag={drag}
+                  isActive={isActive}
+                  setSelectedVideo={setSelectedVideo}
+                />
+              );
+            }}
+            renderPlaceholder={() => (
+              <View style={{ flex: 1, backgroundColor: 'tomato' }} />
+            )}
+            // numColumns={3}
+          />
+          {selectedVideo?.videoUri ? (
+            <Video
+              ref={selectedVideoRef}
+              style={{
+                alignSelf: 'center',
+                width: windowWidth,
+                height: 200
+              }}
+              source={{
+                uri: selectedVideo?.videoUri
+              }}
+              onLoad={() => {
+                selectedVideoRef.current?.playAsync();
+              }}
+              // shouldPlay
+              useNativeControls
+              resizeMode={ResizeMode.CONTAIN}
+              onFullscreenUpdate={async (VideoFullscreenUpdateEvent) => {
+                if (VideoFullscreenUpdateEvent.fullscreenUpdate === 1) {
+                  // await changeScreenOrientationLandscape();
+                } else {
+                  // await changeScreenOrientationPortrait();
+                }
+              }}
+              // onPlaybackStatusUpdate={(status) => setStatus(() => status)}
+            />
+          ) : null}
         </View>
       </ScrollView>
       <ActionSheet

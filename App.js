@@ -19,6 +19,7 @@ export default function App() {
   );
 }
 
+console.info('ENV', process.env);
 const styles = StyleSheet.create({
   container: {
     flex: 1,

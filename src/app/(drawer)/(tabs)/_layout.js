@@ -25,7 +25,7 @@ export default function TabsLayout() {
             )
           }}
         />
-        <Tabs.Screen
+        {/* <Tabs.Screen
           name="customers"
           options={{
             tabBarLabel: 'Customers',
@@ -34,7 +34,7 @@ export default function TabsLayout() {
               <Ionicons name="people-outline" size={size} color={color} />
             )
           }}
-        />
+        /> */}
         <Tabs.Screen
           name="camera"
           options={{
