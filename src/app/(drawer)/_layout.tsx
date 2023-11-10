@@ -4,7 +4,7 @@ import { Drawer } from 'expo-router/drawer';
 import { find } from 'lodash';
 import { useEffect, useState } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Button, Colors, Text, View } from 'react-native-ui-lib';
+import { Button, Colors, Dialog, PanningProvider, Text, View } from "react-native-ui-lib";
 import { StyleSheet } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import {
@@ -13,7 +13,6 @@ import {
 } from 'services/realtimeNotifications';
 import { useGetMeQuery } from 'services/userApi';
 
-import Popup from '../../components/ui/Popup';
 import { logout } from '../../slices/authSlice';
 export default function Layout() {
   const router = useRouter();
@@ -97,11 +96,10 @@ export default function Layout() {
                 setVisible(true);
               }}
             />
-            <Popup
+            <Dialog
               visible={visible}
-              transparent
-              dismiss={() => setVisible(false)}
-              margin="15%"
+              onDismiss={() => setVisible(false)}
+              panDirection={PanningProvider.Directions.DOWN}
             >
               <View style={style.popupContent}>
                 <Text style={{ fontSize: 18 }}>Are you sure?</Text>
@@ -124,7 +122,7 @@ export default function Layout() {
                   />
                   <Button
                     label="Logout"
-                    backgroundColor={Colors.orange10}
+                    backgroundColor="#EF6800"
                     size={Button.sizes.xSmall}
                     onPress={() => {
                       dispatch(logout());
@@ -132,7 +130,8 @@ export default function Layout() {
                   />
                 </View>
               </View>
-            </Popup>
+            </Dialog>
+
           </SafeAreaView>
         );
       }}
@@ -155,6 +154,6 @@ const style = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#fff',
     borderRadius: 10,
-    height: 150
+    height: 120
   }
 });
