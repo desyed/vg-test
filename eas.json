@@ -11,12 +11,31 @@
       },
       "ios": {
         "buildConfiguration": "Debug"
+      },
+      "env": {
+        "APP_ENV": "development",
+        "EXPO_PUBLIC_API_URL":"https://www.videogift.com/api",
+        "EXPO_PUBLIC_AWS_BUCKET":"videogift-prod",
+        "EXPO_PUBLIC_AWS_REGION":"us-east-1"
       }
     },
     "preview": {
-      "distribution": "internal"
+      "distribution": "internal",
+      "env": {
+        "APP_ENV": "preview",
+        "EXPO_PUBLIC_API_URL":"https://www.videogift.com/api",
+        "EXPO_PUBLIC_AWS_BUCKET":"videogift-prod",
+        "EXPO_PUBLIC_AWS_REGION":"us-east-1"
+      }
     },
-    "production": {}
+    "production": {
+      "env": {
+        "APP_ENV": "production",
+        "EXPO_PUBLIC_API_URL":"https://www.videogift.com/api",
+        "EXPO_PUBLIC_AWS_BUCKET":"videogift-prod",
+        "EXPO_PUBLIC_AWS_REGION":"us-east-1"
+      }
+    }
   },
   "submit": {
     "production": {}
