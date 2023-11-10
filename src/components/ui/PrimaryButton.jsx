@@ -1,4 +1,4 @@
-import { StyleSheet } from 'react-native';
+import { ActivityIndicator, StyleSheet } from "react-native";
 import { Button } from 'react-native-ui-lib';
 
 const styles = StyleSheet.create({
@@ -9,12 +9,13 @@ const styles = StyleSheet.create({
   }
 });
 
-export const PrimaryButton = ({ style = {}, label, ...props }) => (
+export const PrimaryButton = ({ style = {}, label, loading = false, ...props }) => (
   <Button
     size={Button.sizes.large}
     style={[styles.button, style]}
-    label={label}
+    label={loading ? '' : label}
+    disabled={loading}
     {...props}
     backgroundColor="#EF6800"
-  />
+  >{loading && <ActivityIndicator color={"white"} />}</Button>
 );
