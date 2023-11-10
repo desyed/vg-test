@@ -7,12 +7,16 @@ const slice = createSlice({
     setCredentials: (state, { payload: { user, token } }) => {
       state.user = user;
       state.token = token;
+    },
+    logout: (state) => {
+      state.user = null;
+      state.token = null;
     }
   },
   extraReducers: (builder) => {}
 });
 
-export const { setCredentials } = slice.actions;
+export const { setCredentials, logout } = slice.actions;
 
 export default slice.reducer;
 

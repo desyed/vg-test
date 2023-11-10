@@ -14,7 +14,9 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Avatar, BorderRadiuses, Spacings, View } from 'react-native-ui-lib';
 import { useGetOrdersQuery } from 'services/ordersApi';
 import { useGetMeQuery } from 'services/userApi';
+import { useDispatch } from "react-redux";
 function getInitials(name) {
+
   // Check if name is null or not a string, return empty string if true
   if (typeof name !== 'string' || name === null) {
     return '';
