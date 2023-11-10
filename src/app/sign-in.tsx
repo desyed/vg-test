@@ -51,7 +51,7 @@ export default function SignIn() {
     <View flex bg-bgColor>
       <ScrollView
         contentInsetAdjustmentBehavior="always"
-        style={{ position: 'relative' }}
+        style={{ position: 'relative', zIndex: 2 }}
       >
         <View>
           <StandardContainer style={{ marginTop: 177 }}>
@@ -92,14 +92,15 @@ export default function SignIn() {
             />
           </StandardContainer>
           <StandardContainer>
-            <PrimaryButton onPress={handleSubmit(onSubmit)} label="Log In" />
+            <PrimaryButton onPress={handleSubmit(onSubmit)} loading={isLoading} label="Log In" />
           </StandardContainer>
         </View>
       </ScrollView>
       <Image
         style={{
           bottom: 0,
-          position: 'absolute'
+          position: 'absolute',
+          zIndex: 0
         }}
         source={require('../../assets/images/LoginImage.png')}
       />
