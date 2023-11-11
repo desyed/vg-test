@@ -1,11 +1,18 @@
-import { DrawerItemList, DrawerItem } from '@react-navigation/drawer';
-import {  useRouter } from 'expo-router';
+import { DrawerItem, DrawerItemList } from '@react-navigation/drawer';
+import { useRouter } from 'expo-router';
 import { Drawer } from 'expo-router/drawer';
 import { find } from 'lodash';
 import { useEffect, useState } from 'react';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { Button, Colors, Dialog, PanningProvider, Text, View } from "react-native-ui-lib";
 import { StyleSheet } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import {
+  Button,
+  Colors,
+  Dialog,
+  PanningProvider,
+  Text,
+  View
+} from 'react-native-ui-lib';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   connectPusher,
@@ -89,6 +96,7 @@ export default function Layout() {
               </Text>
             </View>
             <DrawerItemList {...props} />
+
             <DrawerItem
               label="Logout"
               onPress={() => {
@@ -131,7 +139,6 @@ export default function Layout() {
                 </View>
               </View>
             </Dialog>
-
           </SafeAreaView>
         );
       }}
