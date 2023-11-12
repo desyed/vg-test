@@ -50,6 +50,12 @@
         {
           "cameraPermission": "Allow VideoGift to access your camera."
         }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "The app accesses your photos."
+        }
       ]
     ],
     "experiments": {

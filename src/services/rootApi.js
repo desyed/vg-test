@@ -19,7 +19,7 @@ export const rootApi = createApi({
     );
     return headers;
   },
-  tagTypes: ['Customers', 'VideoGifts', 'SelectedMedia'],
+  tagTypes: ['Customers', 'VideoGifts', 'SelectedMedia', 'Me'],
 
   endpoints: () => ({})
 });
