@@ -1,4 +1,5 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
+import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { LoaderView } from 'components/ui/LoaderView';
 import { PrimaryButton } from 'components/ui/PrimaryButton';
 import { StandardContainer } from 'components/ui/StandardContainer';
@@ -32,6 +33,7 @@ import {
   useGetVideoGiftByIdQuery
 } from 'services/videoGiftApi';
 
+const Tab = createMaterialTopTabNavigator();
 const blurhash =
   '|rF?hV%2WCj[ayj[a|j[az_NaeWBj@ayfRayfQfQM{M|azj[azf6fQfQfQIpWXofj[ayj[j[fQayWCoeoeaya}j[ayfQa{oLj?j[WVj[ayayj[fQoff7azayj[ayj[j[ayofayayayj[fQj[ayayj[ayfjj[j[ayjuayj[';
 
@@ -120,27 +122,16 @@ const VideoPreview = ({ item, index, drag, isActive, setSelectedVideo }) => {
     </ScaleDecorator>
   );
 };
-
-export default function VideoGiftDetailScreen() {
-  const [data, setData] = useState([]);
-
-  const selectedVideoRef = useRef(null);
-  const [showActionSheet, setShowActionSheet] = useState(false);
-  const searchParams = useLocalSearchParams();
-  const windowWidth = Dimensions.get('window').width;
-  const videoPreviewFlatlist = useRef(null);
-
-  const [selectedVideo, setSelectedVideo] = useState({});
-
+const DetailScreen = ({ videoGiftData }) => {
   const router = useRouter();
-  const {
-    data: videoGiftData,
-    isLoading,
-    refetch: refetchVideoGift
-  } = useGetVideoGiftByIdQuery(searchParams?.videoGiftId);
-
+  const [data, setData] = useState([]);
+  const searchParams = useLocalSearchParams();
+  const videoPreviewFlatlist = useRef(null);
+  const selectedVideoRef = useRef(null);
+  const [selectedVideo, setSelectedVideo] = useState({});
+  const windowWidth = Dimensions.get('window').width;
   const [triggerMoveSelectedMedia] = useMoveSelectedMediaOrderMutation();
-  const [generatePreview] = useGeneratePreviewMutation();
+
   const {
     data: selectedMedia,
     isLoading: selectMediaIsLoading,
@@ -152,6 +143,97 @@ export default function VideoGiftDetailScreen() {
   useEffect(() => {
     setData(selectedMedia);
   }, [selectedMedia]);
+  return (
+    <View style={{ flex: 1 }}>
+      <StandardContainer style={{}}>
+        <PrimaryButton
+          label="Add Media"
+          onPress={() => {
+            router.push({
+              pathname: '(drawer)/(tabs)/home/recorder',
+              params: { videoGiftId: searchParams?.videoGiftId }
+            });
+          }}
+        />
+      </StandardContainer>
+      <StandardContainer>
+        <SectionTitle>{videoGiftData?.videoGift?.title}</SectionTitle>
+      </StandardContainer>
+      <DraggableFlatList
+        ref={videoPreviewFlatlist}
+        data={data || []}
+        horizontal
+        initialNumToRender={4}
+        autoscrollThreshold={100}
+        onDragEnd={({ data }) => {
+          setData(data);
+          triggerMoveSelectedMedia({
+            videoGiftId: searchParams?.videoGiftId,
+            selectedMedia: data.map((item, index) => {
+              return { id: item.id, order: index };
+            })
+          });
+        }}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item, index, drag, isActive }) => {
+          return (
+            <VideoPreview
+              item={item}
+              index={index}
+              drag={drag}
+              isActive={isActive}
+              setSelectedVideo={setSelectedVideo}
+            />
+          );
+        }}
+        renderPlaceholder={() => (
+          <View style={{ flex: 1, backgroundColor: 'tomato' }} />
+        )}
+        // numColumns={3}
+      />
+      {selectedVideo?.videoUri ? (
+        <Video
+          ref={selectedVideoRef}
+          style={{
+            alignSelf: 'center',
+            width: windowWidth,
+            height: 200
+          }}
+          source={{
+            uri: selectedVideo?.videoUri
+          }}
+          onLoad={() => {
+            selectedVideoRef.current?.playAsync();
+          }}
+          // shouldPlay
+          useNativeControls
+          resizeMode={ResizeMode.CONTAIN}
+          onFullscreenUpdate={async (VideoFullscreenUpdateEvent) => {
+            if (VideoFullscreenUpdateEvent.fullscreenUpdate === 1) {
+              // await changeScreenOrientationLandscape();
+            } else {
+              // await changeScreenOrientationPortrait();
+            }
+          }}
+          // onPlaybackStatusUpdate={(status) => setStatus(() => status)}
+        />
+      ) : null}
+    </View>
+  );
+};
+
+export default function VideoGiftDetailScreen() {
+  const [showActionSheet, setShowActionSheet] = useState(false);
+  const searchParams = useLocalSearchParams();
+  const windowWidth = Dimensions.get('window').width;
+
+  const {
+    data: videoGiftData,
+    isLoading,
+    refetch: refetchVideoGift
+  } = useGetVideoGiftByIdQuery(searchParams?.videoGiftId);
+
+  const [generatePreview] = useGeneratePreviewMutation();
 
   useFocusEffect(() => {
     // setTimeout(() => {
@@ -159,10 +241,19 @@ export default function VideoGiftDetailScreen() {
     // }, 1000);
   });
 
+  const WithDataDetailScreen = () => (
+    <DetailScreen videoGiftData={videoGiftData} />
+  );
+  const Empty = () => (
+    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <Text>Hey</Text>
+    </View>
+  );
+
   const url = videoGiftData?.videoGift?.completedHLSUrl;
   // console.info('url', url);
   return (
-    <LoaderView isLoading={isLoading || selectMediaIsLoading}>
+    <LoaderView isLoading={isLoading}>
       <Stack.Screen
         options={{
           headerShown: true,
@@ -191,7 +282,7 @@ export default function VideoGiftDetailScreen() {
             flex: 1,
             justifyContent: 'flex-start',
             alignItems: 'stretch',
-
+            height: 800,
             width: '100%'
           }}
         >
@@ -242,79 +333,16 @@ export default function VideoGiftDetailScreen() {
               </Text>
             </View>
           )}
-          <StandardContainer style={{ flex: 1, backgroundColor: '#fff' }}>
-            <PrimaryButton
-              label="Add Media"
-              onPress={() => {
-                router.push({
-                  pathname: '(drawer)/(tabs)/home/recorder',
-                  params: { videoGiftId: searchParams?.videoGiftId }
-                });
-              }}
-            />
-          </StandardContainer>
-          <StandardContainer>
-            <SectionTitle>{videoGiftData?.videoGift?.title}</SectionTitle>
-          </StandardContainer>
-          <DraggableFlatList
-            ref={videoPreviewFlatlist}
-            data={data || []}
-            horizontal
-            initialNumToRender={4}
-            autoscrollThreshold={100}
-            onDragEnd={({ data }) => {
-              setData(data);
-              triggerMoveSelectedMedia({
-                videoGiftId: searchParams?.videoGiftId,
-                selectedMedia: data.map((item, index) => {
-                  return { id: item.id, order: index };
-                })
-              });
+
+          <Tab.Navigator
+            initialLayout={{
+              width: Dimensions.get('window').width
             }}
-            keyExtractor={(item) => item.id}
-            renderItem={({ item, index, drag, isActive }) => {
-              return (
-                <VideoPreview
-                  item={item}
-                  index={index}
-                  drag={drag}
-                  isActive={isActive}
-                  setSelectedVideo={setSelectedVideo}
-                />
-              );
-            }}
-            renderPlaceholder={() => (
-              <View style={{ flex: 1, backgroundColor: 'tomato' }} />
-            )}
-            // numColumns={3}
-          />
-          {selectedVideo?.videoUri ? (
-            <Video
-              ref={selectedVideoRef}
-              style={{
-                alignSelf: 'center',
-                width: windowWidth,
-                height: 200
-              }}
-              source={{
-                uri: selectedVideo?.videoUri
-              }}
-              onLoad={() => {
-                selectedVideoRef.current?.playAsync();
-              }}
-              // shouldPlay
-              useNativeControls
-              resizeMode={ResizeMode.CONTAIN}
-              onFullscreenUpdate={async (VideoFullscreenUpdateEvent) => {
-                if (VideoFullscreenUpdateEvent.fullscreenUpdate === 1) {
-                  // await changeScreenOrientationLandscape();
-                } else {
-                  // await changeScreenOrientationPortrait();
-                }
-              }}
-              // onPlaybackStatusUpdate={(status) => setStatus(() => status)}
-            />
-          ) : null}
+          >
+            <Tab.Screen name="Home" component={WithDataDetailScreen} />
+            <Tab.Screen name="Music" component={Empty} />
+            <Tab.Screen name="Theme" component={Empty} />
+          </Tab.Navigator>
         </View>
       </ScrollView>
       <ActionSheet

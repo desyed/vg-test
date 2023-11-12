@@ -1,11 +1,18 @@
-import { DrawerItemList, DrawerItem } from '@react-navigation/drawer';
-import {  useRouter } from 'expo-router';
+import { DrawerItem, DrawerItemList } from '@react-navigation/drawer';
+import { useRouter } from 'expo-router';
 import { Drawer } from 'expo-router/drawer';
 import { find } from 'lodash';
 import { useEffect, useState } from 'react';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { Button, Colors, Dialog, PanningProvider, Text, View } from "react-native-ui-lib";
 import { StyleSheet } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import {
+  Button,
+  Colors,
+  Dialog,
+  PanningProvider,
+  Text,
+  View
+} from 'react-native-ui-lib';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   connectPusher,
@@ -43,7 +50,7 @@ export default function Layout() {
   console.log('user', user);
   // @ts-ignore
   useEffect(() => {
-    if(user?.role === 'USER') setIsUser(true);
+    if (user?.role === 'USER') setIsUser(true);
     if (!user?.selectedOrganizationId) return;
     connectPusher(user);
     return disconnectPusher;
@@ -92,16 +99,18 @@ export default function Layout() {
               </Text>
             </View>
             <DrawerItemList {...props} />
-            {isUser && <DrawerItem
-              label="Organizations"
-              onPress={() => {
-                router.push('(tabs)/home/organizations')
-              }}
-            />}
+            {isUser && (
+              <DrawerItem
+                label="Organizations"
+                onPress={() => {
+                  router.push('(tabs)/home/organizations');
+                }}
+              />
+            )}
             <DrawerItem
               label="Settings"
               onPress={() => {
-                router.push('(tabs)/home/settings')
+                router.push('(tabs)/home/settings');
               }}
             />
             <DrawerItem
@@ -146,7 +155,6 @@ export default function Layout() {
                 </View>
               </View>
             </Dialog>
-
           </SafeAreaView>
         );
       }}
