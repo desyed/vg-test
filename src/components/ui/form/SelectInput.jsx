@@ -24,11 +24,16 @@ export const SelectInput = ({
         fieldState: { error }
       }) => (
         <>
-          <Text style={[styles.label]}>{label}</Text>
+          <Text style={[styles.label]}>
+            {label} {!_.isEmpty(rules?.required) && '*'}
+          </Text>
           <View
             style={[
               styles.container,
-              { borderColor: error ? 'red' : styles.container.borderColor }
+              {
+                borderColor: error ? 'red' : styles.container.borderColor,
+                height: 50
+              }
             ]}
           >
             <Picker
@@ -38,8 +43,9 @@ export const SelectInput = ({
                 onChange(item);
               }}
               topBarProps={{ title: label }}
-              // style={{color: Colors.red20}}
-              useSafeArea
+              style={{
+                color: 'black'
+              }}
               enableModalBlur={false}
               {...inputProps}
 

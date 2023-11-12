@@ -1,14 +1,15 @@
+import _ from 'lodash';
 import { useRef } from 'react';
 import { Controller } from 'react-hook-form';
 import { Pressable, StyleSheet } from 'react-native';
 import { Text, TextField, View } from 'react-native-ui-lib';
-
 export const TextInput = ({
   control,
   name,
   placeholder,
   secureTextEntry = false,
   textInputProps = {},
+  required = false,
   rules = {},
   label = ''
 }) => {
@@ -28,7 +29,9 @@ export const TextInput = ({
             ref.current.focus();
           }}
         >
-          <Text style={[styles.label]}>{label}</Text>
+          <Text style={[styles.label]}>
+            {label} {!_.isEmpty(rules?.required) && '*'}
+          </Text>
           <View
             style={[
               styles.container,

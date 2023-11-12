@@ -14,9 +14,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Avatar, BorderRadiuses, Spacings, View } from 'react-native-ui-lib';
 import { useGetOrdersQuery } from 'services/ordersApi';
 import { useGetMeQuery } from 'services/userApi';
-import { useDispatch } from "react-redux";
 function getInitials(name) {
-
   // Check if name is null or not a string, return empty string if true
   if (typeof name !== 'string' || name === null) {
     return '';
@@ -130,7 +128,13 @@ function formatDate(inputDate) {
 }
 
 export default function Index() {
-  const { data: orders, isLoading, isFetching, refetch } = useGetOrdersQuery();
+  const {
+    data: orders,
+    isLoading,
+    isFetching,
+    refetch
+  } = useGetOrdersQuery({});
+
   // console.info('orders', orders);
   // if (isLoading) return <LoaderScreen message="Loading" overlay />;
 

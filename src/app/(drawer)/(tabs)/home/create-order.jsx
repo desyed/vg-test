@@ -23,9 +23,15 @@ export default function CreateCustomerScreen() {
 
   const [createOrder, { isLoading: isCreateLoading }] =
     useCreateVideoGiftOrderMutation();
+
   const { data: experiences, isLoading: isLoadingExperiences } =
-    useGetVideoGiftExperiencesQuery({});
-  const { data: users, isLoading } = useSearchOrganizationUsersQuery({});
+    useGetVideoGiftExperiencesQuery({
+      refetchOnMountOrArgChange: true
+    });
+
+  const { data: users, isLoading } = useSearchOrganizationUsersQuery({
+    refetchOnMountOrArgChange: true
+  });
   const { data: occasions, isLoading: isLoadingOccasion } =
     useGetOccasionsQuery({});
 
@@ -137,9 +143,7 @@ export default function CreateCustomerScreen() {
               control={control}
               name="phone"
               label="Customer Phone"
-              rules={{
-                required: 'Phone is required'
-              }}
+              rules={{}}
               placeholder="Phone"
               textInputProps={{ returnKeyType: 'next', inputMode: 'tel' }}
             />
