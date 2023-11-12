@@ -8,6 +8,13 @@ const api = rootApi.injectEndpoints({
         method: 'GET',
         params
       })
+    }),
+    updateProfile: builder.mutation({
+      query: (credentials) => ({
+        url: '/use/me',
+        method: 'PATCH',
+        body: credentials
+      })
     })
   }),
   overrideExisting: false
