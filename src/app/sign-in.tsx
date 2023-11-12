@@ -54,7 +54,7 @@ export default function SignIn() {
         style={{ position: 'relative', zIndex: 2 }}
       >
         <View>
-          <StandardContainer style={{ marginTop: 177 }}>
+          <StandardContainer style={{ marginTop: 140 }}>
             <Title>Log In</Title>
           </StandardContainer>
           {error?.data?.message ? (

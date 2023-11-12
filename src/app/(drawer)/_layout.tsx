@@ -25,6 +25,8 @@ export default function Layout() {
   const router = useRouter();
   const dispatch = useDispatch();
   const [visible, setVisible] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [isUser, setIsUser] = useState(false);
 
   const user = useSelector((state) => {
     return state.auth?.user;
@@ -40,18 +42,19 @@ export default function Layout() {
   );
 
   useEffect(() => {
-    console.log('token', token);
     if (!token) {
       router.replace('sign-in');
     }
   }, [token]);
 
+  console.log('user', user);
   // @ts-ignore
   useEffect(() => {
+    if (user?.role === 'USER') setIsUser(true);
     if (!user?.selectedOrganizationId) return;
     connectPusher(user);
     return disconnectPusher;
-  }, [user?.selectedOrganizationId]);
+  }, [user]);
 
   return (
     <Drawer
@@ -96,7 +99,20 @@ export default function Layout() {
               </Text>
             </View>
             <DrawerItemList {...props} />
-
+            {isUser && (
+              <DrawerItem
+                label="Organizations"
+                onPress={() => {
+                  router.push('(tabs)/home/organizations');
+                }}
+              />
+            )}
+            <DrawerItem
+              label="Settings"
+              onPress={() => {
+                router.push('(tabs)/home/settings');
+              }}
+            />
             <DrawerItem
               label="Logout"
               onPress={() => {
@@ -142,7 +158,7 @@ export default function Layout() {
           </SafeAreaView>
         );
       }}
-      screenOptions={{ headerShown: false, swipeEdgeWidth: 0 }}
+      screenOptions={{ headerShown: false, swipeEdgeWidth: 10 }}
     >
       <Drawer.Screen
         name="(tabs)"
