@@ -27,13 +27,6 @@ const api = rootApi.injectEndpoints({
       }),
       invalidatesTags: ['Me']
     }),
-    uploadImage: builder.mutation({
-      query: (body: any) => ({
-        url: '/signedUrl/create',
-        method: 'POST',
-        body
-      })
-    }),
     updatePassword: builder.mutation({
       query: (params: IUpdatePassword) => ({
         url: '/user/password',

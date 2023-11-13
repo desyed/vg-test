@@ -1,4 +1,4 @@
-import { useRouter } from 'expo-router';
+import { Stack, useRouter } from "expo-router";
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import Toast from 'react-native-simple-toast';
@@ -43,6 +43,12 @@ const ChangePassword = () => {
   return (
     <KeyboardAvoidingWrapper>
       <StandardContainer style={{ minHeight: 500 }}>
+        <Stack.Screen
+          options={{
+            headerShown: true,
+            title: 'Change Password'
+          }}
+        />
         <TextInput
           control={control}
           rules={{ required: 'Current password is required' }}
