@@ -1,12 +1,12 @@
 import { Stack } from 'expo-router';
-import { Alert, ScrollView, StyleSheet } from 'react-native';
+import { Alert, StyleSheet } from 'react-native';
 import {
-  Colors,
   BorderRadiuses,
-  View,
+  Colors,
   Image,
   ListItem,
-  Text
+  Text,
+  View
 } from 'react-native-ui-lib';
 
 import { KeyboardAvoidingWrapper } from '../../../../components/ui/KeyboardAvoidingWrapper';
@@ -41,6 +41,7 @@ const Organizations = () => {
               data?.map((item) => {
                 return (
                   <ListItem
+                    key={item?.id}
                     activeBackgroundColor={Colors.grey60}
                     activeOpacity={0.3}
                     height={77.5}
@@ -51,7 +52,10 @@ const Organizations = () => {
                     onPress={() => Alert.alert(`pressed on order #`)}
                   >
                     <ListItem.Part left>
-                      <Image source={{ uri: item?.image }} style={styles.image} />
+                      <Image
+                        source={{ uri: item?.image || item?.user?.image }}
+                        style={styles.image}
+                      />
                     </ListItem.Part>
                     <ListItem.Part
                       middle

@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react';
 import { StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import {
+  Avatar,
   Button,
   Colors,
   Dialog,
@@ -71,6 +72,7 @@ export default function Layout() {
                 borderBottomWidth: 1
               }}
             >
+              <Avatar size={100} source={{ uri: dataMe?.image }} />
               <Text
                 style={{
                   fontSize: 22,
