@@ -14,7 +14,7 @@ const ChangePassword = () => {
   const [updatePassword] = useUpdatePasswordMutation();
   const [isLoading, setIsLoading] = useState(false);
 
-  const { control, handleSubmit } = useForm({
+  const { control, handleSubmit, getValues } = useForm({
     defaultValues: {
       originalPassword: '',
       newPassword: ''
@@ -23,9 +23,10 @@ const ChangePassword = () => {
 
   const onSubmit = async (data) => {
     const router = useRouter();
+    const {originalPassword, newPassword} = data;
     setIsLoading(true);
     try {
-      const res = await updatePassword(data);
+      const res = await updatePassword({originalPassword, newPassword});
       if (res?.data) {
         setIsLoading(false);
         Toast.show('Password Successfuly Updated');
@@ -48,6 +49,7 @@ const ChangePassword = () => {
           name="originalPassword"
           label="Current Password"
           placeholder="Current"
+          secureTextEntry
           textInputProps={{
             returnKeyType: 'next',
             // autoCapitalize: '',
@@ -63,8 +65,21 @@ const ChangePassword = () => {
           name="newPassword"
           label="New Password"
           placeholder="New"
+          secureTextEntry
           textInputProps={{
             // label: 'Email',
+            returnKeyType: 'next',
+            autoCorrect: false
+          }}
+        />
+        <TextInput
+          control={control}
+          rules={{ required: { value: true, message: 'Confirm password is required' }, validate: (value) => (value === getValues('newPassword') || "Passwords should match!") }}
+          name="confirmPassword"
+          label="Confirm Password"
+          placeholder="Confirm Password"
+          secureTextEntry
+          textInputProps={{
             returnKeyType: 'next',
             autoCorrect: false
           }}
