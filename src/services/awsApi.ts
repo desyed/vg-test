@@ -1,4 +1,5 @@
 import { rootApi } from './rootApi';
+import { store } from "../store";
 
 const awsApi = rootApi.injectEndpoints({
   endpoints: (builder) => ({
@@ -63,5 +64,22 @@ export const sendFile = (signedUrl, file, onSuccess, onFail, onProgress, options
     xhr.send(file);
   });
 };
+
+export function callGetSignecdUrlDirectly(payload: any) {
+  return new Promise((resolve, reject) => {
+    store.dispatch(rootApi.endpoints?.getSignedPutUrl.initiate(payload))
+      .then(response => {
+        if (response.data) {
+          // Handle successful response
+          resolve(response)
+        }
+      })
+      .catch(error => {
+        // Handle error
+        reject(error)
+      });
+  })
+
+}
 
 export const { useGetSignedPutUrlMutation } = awsApi;

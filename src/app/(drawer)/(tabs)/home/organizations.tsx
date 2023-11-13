@@ -1,18 +1,19 @@
-import { Stack } from 'expo-router';
+import { router, Stack } from "expo-router";
 import { Alert, StyleSheet } from 'react-native';
 import {
   BorderRadiuses,
   Colors,
   Image,
   ListItem,
-  Text,
+  Text, TouchableOpacity,
   View
-} from 'react-native-ui-lib';
+} from "react-native-ui-lib";
 
 import { KeyboardAvoidingWrapper } from '../../../../components/ui/KeyboardAvoidingWrapper';
 import { LoaderView } from '../../../../components/ui/LoaderView';
 import { StandardContainer } from '../../../../components/ui/StandardContainer';
 import { useSearchOrganizationUsersQuery } from '../../../../services/organizationApi';
+import Ionicons from "@expo/vector-icons/Ionicons";
 
 const Organizations = () => {
   // @ts-ignore
@@ -32,7 +33,22 @@ const Organizations = () => {
           }}
         >
           <Stack.Screen
-            options={{ headerShown: true, title: 'Organizations' }}
+            options={{ headerShown: true, title: 'Organizations',
+              headerRight: () => (
+                <TouchableOpacity
+                  onPress={() => {
+                    router.push('(tabs)/home/add-org-user');
+                  }}
+                >
+                  <View style={{ padding: 10 }}>
+                    <Ionicons
+                      name="add"
+                      size={24}
+                      color="black"
+                    />
+                  </View>
+                </TouchableOpacity>
+              )}}
           />
 
           <StandardContainer>
@@ -47,9 +63,13 @@ const Organizations = () => {
                     height={77.5}
                     style={{
                       backgroundColor: Colors.grey70,
-                      borderRadius: BorderRadiuses.br20
+                      borderRadius: BorderRadiuses.br20,
+                      marginBottom: 10
                     }}
-                    onPress={() => Alert.alert(`pressed on order #`)}
+                    onPress={() => router.push({
+                      pathname: '(tabs)/home/add-org-user',
+                      params: { id: item.id }
+                    })}
                   >
                     <ListItem.Part left>
                       <Image
