@@ -40,7 +40,10 @@ const Header = () => {
                   navigation.toggleDrawer();
                 }}
               >
-                <Avatar label={getInitials(dataMe?.name)} />
+                <Avatar
+                  source={{ uri: dataMe?.image }}
+                  label={getInitials(dataMe?.name)}
+                />
               </TouchableOpacity>
               <Ionicons name="notifications-outline" size={32} color="white" />
             </Group>

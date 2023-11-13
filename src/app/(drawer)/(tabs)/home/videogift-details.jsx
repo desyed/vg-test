@@ -226,6 +226,7 @@ export default function VideoGiftDetailScreen() {
   const [showActionSheet, setShowActionSheet] = useState(false);
   const searchParams = useLocalSearchParams();
   const windowWidth = Dimensions.get('window').width;
+  const windowHeight = Dimensions.get('window').height;
 
   const {
     data: videoGiftData,
@@ -282,7 +283,7 @@ export default function VideoGiftDetailScreen() {
             flex: 1,
             justifyContent: 'flex-start',
             alignItems: 'stretch',
-            height: 800,
+            height: windowHeight - 200,
             width: '100%'
           }}
         >
