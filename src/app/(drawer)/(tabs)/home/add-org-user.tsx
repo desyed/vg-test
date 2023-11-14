@@ -1,15 +1,12 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { Stack, useLocalSearchParams } from 'expo-router';
+import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
+import { log } from 'expo-updates/build-cli/utils/log';
 import _ from 'lodash';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { StyleSheet } from 'react-native';
-import {
-  Avatar,
-  BorderRadiuses,
-  Colors,
-  View
-} from 'react-native-ui-lib';
+import Toast from 'react-native-simple-toast';
+import { Avatar, BorderRadiuses, Colors, View } from 'react-native-ui-lib';
 
 import { KeyboardAvoidingWrapper } from '../../../../components/ui/KeyboardAvoidingWrapper';
 import { LoaderView } from '../../../../components/ui/LoaderView';
@@ -19,15 +16,17 @@ import { SectionTitle } from '../../../../components/ui/Title';
 import { SelectInput } from '../../../../components/ui/form/SelectInput';
 import { TextInput } from '../../../../components/ui/form/TextInput';
 import {
-  useCreateOrgUserMutation, useGetOrgUserByIdQuery, useUpdateOrgUserMutation
-} from "../../../../services/organizationApi";
+  useCreateOrgUserMutation,
+  useGetOrgUserByIdQuery,
+  useUpdateOrgUserMutation
+} from '../../../../services/organizationApi';
 import { useUpdateProfileMutation } from '../../../../services/userApi';
-import { createUploadTask, pickImage } from "../../../../utils/uploadUtil";
+import { createUploadTask, pickImage } from '../../../../utils/uploadUtil';
 import { getInitials } from '../../../../utils/utils';
-import { log } from "expo-updates/build-cli/utils/log";
 
 const AddUser = () => {
   const searchParams = useLocalSearchParams();
+  const router = useRouter();
 
   const roles = ['ADMIN', 'USER'];
   // @ts-ignore
@@ -44,7 +43,8 @@ const AddUser = () => {
     isLoading
   } = useGetOrgUserByIdQuery(searchParams?.id);
 
-  const [updateOrgUser] = useUpdateOrgUserMutation()
+  const [updateOrgUser, { isLoading: isUpdateLoading }] =
+    useUpdateOrgUserMutation();
 
   const { control, handleSubmit, setValue } = useForm({
     defaultValues: {
@@ -65,12 +65,14 @@ const AddUser = () => {
       setValue('email', userIfo?.email);
       setValue('description', userIfo?.description);
       setValue('role', userIfo?.role);
+      // @ts-ignore
+      setValue('active', userIfo?.active);
     }
   }, [userIfo]);
 
   const uploadImage = async () => {
-    setImageLoading(true)
-    const resizedImage = await pickImage()
+    setImageLoading(true);
+    const resizedImage = await pickImage();
     const task = await createUploadTask({
       uri: resizedImage?.uri,
       acl: 'public-read',
@@ -81,37 +83,39 @@ const AddUser = () => {
       key: `organization/member/${userIfo.id}/profile-image.jpg`
     });
 
-    console.log("v-url",task?.url);
-
     if (task) {
-      try{
+      try {
         await task.task.uploadAsync();
-        await  updateOrgUser({
+        await updateOrgUser({
           id: userIfo?.id,
           image: task?.url
-        })
+        });
       } catch (e) {
         console.log(e);
       }
-
     }
 
-
-    setImageLoading(false)
-  }
+    setImageLoading(false);
+  };
 
   const onSubmit = async (data) => {
     try {
-      const result = await createUser(data);
+      const result = searchParams?.id
+        ? await updateOrgUser({ id: userIfo?.id, ...data })
+        : await createUser(data);
       if (result?.data) {
-        // router.replace({
-        //   pathname: '/(drawer)/home/videogift-details',
-        //   params: { videoGiftId: result.data.videoGift.id }
-        // });
-        alert('Created successfully');
+        router.push({
+          pathname: '(tabs)/home/organizations'
+        });
+        Toast.show(
+          `${searchParams?.id ? 'Updated' : 'Created'} Successfully`,
+          3
+        );
+      } else {
+        Toast.show(`${searchParams?.id ? 'Update' : 'Create'} Failed!`, 3);
       }
     } catch (e) {
-      alert(e);
+      Toast.show(`${searchParams?.id ? 'Update' : 'Create'} Failed!`, 3);
     }
   };
 
@@ -238,11 +242,28 @@ const AddUser = () => {
               }}
               // inputProps={{ label: 'Assigned To' }}
             />
+            {searchParams?.id && (
+              <SelectInput
+                items={_.map([true, false], (val) => ({
+                  value: val,
+                  label: val ? 'Yes' : 'No'
+                }))}
+                label="Active"
+                control={control}
+                name="active"
+                placeholder="Select Role"
+                textInputProps={{
+                  returnKeyType: 'next'
+                }}
+                // inputProps={{ label: 'Assigned To' }}
+              />
+            )}
           </StandardContainer>
           <StandardContainer>
             <PrimaryButton
               label={`${searchParams?.id ? 'Update' : 'Create'} User`}
               onPress={handleSubmit(onSubmit)}
+              loading={isUpdateLoading || createLoading}
             />
           </StandardContainer>
         </View>
