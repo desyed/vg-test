@@ -29,9 +29,10 @@ import {
   useMoveSelectedMediaOrderMutation
 } from 'services/mediaApi';
 import {
-  useGeneratePreviewMutation,
+  useGeneratePreviewMutation, useGetBackgroundMusicByVIdQuery,
   useGetVideoGiftByIdQuery
-} from 'services/videoGiftApi';
+} from "services/videoGiftApi";
+import MusicTab from "../../../../components/backgroundMusic/music-tab";
 
 const Tab = createMaterialTopTabNavigator();
 const blurhash =
@@ -222,6 +223,8 @@ const DetailScreen = ({ videoGiftData }) => {
   );
 };
 
+
+
 export default function VideoGiftDetailScreen() {
   const [showActionSheet, setShowActionSheet] = useState(false);
   const searchParams = useLocalSearchParams();
@@ -247,7 +250,9 @@ export default function VideoGiftDetailScreen() {
   );
   const Empty = () => (
     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-      <Text>Hey</Text>
+      {/*musical-notes-outline*/}
+      <Ionicons name="musical-notes-outline" size={32} color="black" />
+      <Text>No Music Found!</Text>
     </View>
   );
 
@@ -336,12 +341,14 @@ export default function VideoGiftDetailScreen() {
           )}
 
           <Tab.Navigator
+            screenOptions={{ tabBarScrollEnabled: false }}
             initialLayout={{
               width: Dimensions.get('window').width
             }}
+
           >
             <Tab.Screen name="Home" component={WithDataDetailScreen} />
-            <Tab.Screen name="Music" component={Empty} />
+            <Tab.Screen name="Music" component={MusicTab} />
             <Tab.Screen name="Theme" component={Empty} />
           </Tab.Navigator>
         </View>

@@ -161,7 +161,7 @@ const AddUser = () => {
               <Avatar
                 size={100}
                 source={{ uri: userIfo?.image }}
-                label={getInitials(userIfo?.name)}
+                label={userIfo?.name? getInitials(userIfo?.name) : ""}
                 onPress={uploadImage}
                 customRibbon={
                   <View
