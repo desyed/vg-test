@@ -11,7 +11,14 @@ import { Drawer } from 'expo-router/drawer';
 import { ScrollView, SectionList, StyleSheet } from 'react-native';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Avatar, BorderRadiuses, Spacings, View } from 'react-native-ui-lib';
+import {
+  Avatar,
+  BorderRadiuses,
+  Image,
+  Spacings,
+  View,
+  Text
+} from 'react-native-ui-lib';
 import { useGetOrdersQuery } from 'services/ordersApi';
 import { useGetMeQuery } from 'services/userApi';
 function getInitials(name) {
@@ -188,6 +195,19 @@ export default function Index() {
             <SectionTitle>{title}</SectionTitle>
           </View>
         )}
+        ListEmptyComponent={
+          <View
+            style={{
+              flex: 1,
+              paddingVertical: 50,
+              justifyContent: 'center',
+              alignItems: 'center'
+            }}
+          >
+            <Image source={require('../../../../../assets/empty.png')} />
+            <Text>No Orders found!</Text>
+          </View>
+        }
       />
 
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>

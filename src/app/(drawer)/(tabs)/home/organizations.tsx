@@ -1,19 +1,21 @@
-import { router, Stack } from "expo-router";
+import Ionicons from '@expo/vector-icons/Ionicons';
+import { router, Stack } from 'expo-router';
 import { Alert, StyleSheet } from 'react-native';
 import {
   BorderRadiuses,
+  Chip,
   Colors,
   Image,
   ListItem,
-  Text, TouchableOpacity,
+  Text,
+  TouchableOpacity,
   View
-} from "react-native-ui-lib";
+} from 'react-native-ui-lib';
 
 import { KeyboardAvoidingWrapper } from '../../../../components/ui/KeyboardAvoidingWrapper';
 import { LoaderView } from '../../../../components/ui/LoaderView';
 import { StandardContainer } from '../../../../components/ui/StandardContainer';
 import { useSearchOrganizationUsersQuery } from '../../../../services/organizationApi';
-import Ionicons from "@expo/vector-icons/Ionicons";
 
 const Organizations = () => {
   // @ts-ignore
@@ -33,7 +35,9 @@ const Organizations = () => {
           }}
         >
           <Stack.Screen
-            options={{ headerShown: true, title: 'Organizations',
+            options={{
+              headerShown: true,
+              title: 'Organizations',
               headerRight: () => (
                 <TouchableOpacity
                   onPress={() => {
@@ -41,14 +45,11 @@ const Organizations = () => {
                   }}
                 >
                   <View style={{ padding: 10 }}>
-                    <Ionicons
-                      name="add"
-                      size={24}
-                      color="black"
-                    />
+                    <Ionicons name="add" size={24} color="black" />
                   </View>
                 </TouchableOpacity>
-              )}}
+              )
+            }}
           />
 
           <StandardContainer>
@@ -66,10 +67,12 @@ const Organizations = () => {
                       borderRadius: BorderRadiuses.br20,
                       marginBottom: 10
                     }}
-                    onPress={() => router.push({
-                      pathname: '(tabs)/home/add-org-user',
-                      params: { id: item.id }
-                    })}
+                    onPress={() =>
+                      router.push({
+                        pathname: '(tabs)/home/add-org-user',
+                        params: { id: item.id }
+                      })
+                    }
                   >
                     <ListItem.Part left>
                       <Image
@@ -91,9 +94,15 @@ const Organizations = () => {
                         >
                           {item?.name}
                         </Text>
-                        <Text grey10 text70 style={{ marginTop: 2 }}>
-                          .
-                        </Text>
+                        {item?.active ? (
+                          <Text style={{ marginTop: 2, color: Colors.green20 }}>
+                            Active
+                          </Text>
+                        ) : (
+                          <Text style={{ marginTop: 2, color: Colors.green20 }}>
+                            Inactive
+                          </Text>
+                        )}
                       </ListItem.Part>
                       <ListItem.Part>
                         <Text
