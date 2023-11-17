@@ -1,4 +1,5 @@
 import { Inter_900Black, useFonts } from '@expo-google-fonts/inter';
+import 'expo-dev-client';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useCallback, useEffect, useState } from 'react';
