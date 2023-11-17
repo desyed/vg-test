@@ -4,7 +4,7 @@ import { LoaderView } from 'components/ui/LoaderView';
 import { PrimaryButton } from 'components/ui/PrimaryButton';
 import { StandardContainer } from 'components/ui/StandardContainer';
 import { SectionTitle } from 'components/ui/Title';
-import { ResizeMode, Video } from 'expo-av';
+import { Audio, ResizeMode, Video } from "expo-av";
 import {
   Stack,
   useFocusEffect,
@@ -32,6 +32,8 @@ import {
   useGeneratePreviewMutation, useGetBackgroundMusicByVIdQuery,
   useGetVideoGiftByIdQuery
 } from "services/videoGiftApi";
+import { useSelectedBackgroundMusicQuery } from "../../../../services/backgroundMusicApi";
+import hairlineWidth = StyleSheet.hairlineWidth;
 import MusicTab from "../../../../components/backgroundMusic/music-tab";
 
 const Tab = createMaterialTopTabNavigator();
@@ -225,6 +227,7 @@ const DetailScreen = ({ videoGiftData }) => {
 
 
 
+
 export default function VideoGiftDetailScreen() {
   const [showActionSheet, setShowActionSheet] = useState(false);
   const searchParams = useLocalSearchParams();
@@ -341,14 +344,14 @@ export default function VideoGiftDetailScreen() {
           )}
 
           <Tab.Navigator
-            screenOptions={{ tabBarScrollEnabled: false }}
+            screenOptions={{ swipeEnabled: false }}
             initialLayout={{
               width: Dimensions.get('window').width
             }}
 
           >
             <Tab.Screen name="Home" component={WithDataDetailScreen} />
-            <Tab.Screen name="Music" component={MusicTab} />
+            <Tab.Screen name="Music" component={() => <MusicTab videoGiftId={searchParams?.videoGiftId}/>} />
             <Tab.Screen name="Theme" component={Empty} />
           </Tab.Navigator>
         </View>

@@ -4,8 +4,6 @@ import { useEffect, useRef, useState } from 'react';
 import { Dimensions, View, Text, StyleSheet, ScrollView } from 'react-native';
 import { Chip, TouchableOpacity } from 'react-native-ui-lib';
 
-import { useGetSelectedMediaQuery } from '../../services/mediaApi';
-import { useSelectedBackgroundMusicQuery } from '../../services/videoGiftApi';
 import { PrimaryButton } from '../ui/PrimaryButton';
 import { StandardContainer } from '../ui/StandardContainer';
 import { SectionTitle } from '../ui/Title';
@@ -13,29 +11,31 @@ import { SectionTitle } from '../ui/Title';
 import hairlineWidth = StyleSheet.hairlineWidth;
 
 import { Audio } from 'expo-av';
+import { useGetBgMusicCategoriesQuery, useSelectedBackgroundMusicQuery } from "../../services/backgroundMusicApi";
 
-const MusicTab = () => {
+const MusicTab = ({videoGiftId}: {videoGiftId: string}) => {
   const [sound, setSound] = useState<Audio.Sound>();
   const [playing, setPlaying] = useState<number | string | undefined | null>();
+  const {data: categories} = useGetBgMusicCategoriesQuery(null)
+  if(categories){
+    console.log('categories', categories);
+  }
 
-  async function playSound(id: string | number) {
-    setPlaying(id);
+  async function playSound(item: any) {
+    setPlaying(item?.id);
     console.log('Loading Sound');
     const { sound } = await Audio.Sound.createAsync(
-      require('../../images/track.wav'),
+      item?.audioUrl,
       null,
       (status) => {
         if (!status?.isPlaying) {
           // setPlaying(null);
-          console.log('sd', status);
+          // console.log('sd', status);
         }
       }
     );
     setSound(sound);
 
-
-
-    console.log('Playing Sound');
     await sound.playAsync();
   }
 
@@ -54,27 +54,19 @@ const MusicTab = () => {
   }, [sound]);
 
   const router = useRouter();
-  const [data, setData] = useState([
-    {
-      id: 1,
-      title: 'title 1'
-    },
-    {
-      id: 2,
-      title: 'title:2'
-    }
-  ]);
+  const [data, setData] = useState<any[]>([]);
 
   const {
     data: backgroundMusicList,
     isLoading,
     error
-  } = useSelectedBackgroundMusicQuery('searchParams?.videoGiftId');
+  } = useSelectedBackgroundMusicQuery(videoGiftId);
 
   if (backgroundMusicList) {
     // debugger;
-    console.log(backgroundMusicList);
+    console.log('asdf', backgroundMusicList);
   }
+
 
   return (
     <View style={{ flex: 1 }}>
@@ -82,6 +74,7 @@ const MusicTab = () => {
         <PrimaryButton
           label="Add Background Music"
           onPress={() => {
+            stopSound()
             router.push({
               pathname: '(drawer)/(tabs)/home/add-bg-music',
               params: { videoGiftId: 'searchParams?.videoGiftId ' }
@@ -92,24 +85,16 @@ const MusicTab = () => {
       <StandardContainer>
         <SectionTitle>Selected Background Music</SectionTitle>
       </StandardContainer>
-      <StandardContainer>
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={{ gap: 10 }}
-        >
-          <Chip backgroundColor="green" label="All" onPress={() => console.log('pressed')} />
-          <Chip label="Happy" onPress={() => console.log('pressed')} />
-          <Chip label="Festive" onPress={() => console.log('pressed')} />
-          <Chip label="Chrismas" onPress={() => console.log('pressed')} />
-          <Chip label="Charming" onPress={() => console.log('pressed')} />
-        </ScrollView>
-      </StandardContainer>
 
       <StandardContainer>
-        {data &&
+        {data && Array.isArray(data) && data.length > 0 ?
           data.map((item: any) => {
             return (
+              <TouchableOpacity
+                onPress={
+                  item.id === playing ? stopSound : () => playSound(item)
+                }
+              >
               <View
                 style={{
                   flexDirection: 'row',
@@ -128,29 +113,35 @@ const MusicTab = () => {
                     borderRadius: 50
                   }}
                 >
-                  <TouchableOpacity
-                    onPress={
-                      item.id === playing ? stopSound : () => playSound(item.id)
-                    }
-                  >
+
                     <Ionicons name={item.id === playing ? 'pause' : 'play'} />
-                  </TouchableOpacity>
+
                 </View>
                 <View style={{ flex: 1 }}>
-                  <Text>{item.title}</Text>
-                  <Text>Artist: abc</Text>
+                  <Text>{item.name}</Text>
+                  <Text>Duration: {item?.duration}</Text>
                 </View>
-                <View>
-                  <TouchableOpacity>
-                    <Ionicons color="orange" name="trash" />
-                  </TouchableOpacity>
-                </View>
+                <TouchableOpacity>
+                  <View style={{height: 40, width: 40, alignItems: "center", justifyContent: 'center' }}>
+                      <Ionicons color="orange" name="trash" />
+                  </View>
+                </TouchableOpacity>
               </View>
+              </TouchableOpacity>
             );
-          })}
+          }): (
+            <View style={{ height: 200, justifyContent: 'center', alignItems: 'center' }}>
+              {/*musical-notes-outline*/}
+              <Ionicons name="musical-notes-outline" size={32} color="black" />
+              <Text>No Music Selected!</Text>
+            </View>
+          )}
+
       </StandardContainer>
     </View>
   );
 };
+
+
 
 export default MusicTab;
