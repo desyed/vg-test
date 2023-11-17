@@ -1,6 +1,7 @@
 {
   "expo": {
     "name": "VideoGift Business",
+    "owner": "artyfrantz",
     "slug": "videogift-mobile",
     "scheme": "videogift",
     "version": "1.0.0",
