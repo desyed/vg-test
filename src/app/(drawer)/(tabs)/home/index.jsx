@@ -145,10 +145,12 @@ export default function Index() {
     refetch
   } = useGetOrdersQuery({});
 
-  // console.info('orders', orders);
   // if (isLoading) return <LoaderScreen message="Loading" overlay />;
-
   const groupedByOrderStatus = groupByOrderStatus(orders || []);
+
+  if(orders){
+    console.info('ordersz', JSON.stringify(groupedByOrderStatus?.data));
+  }
 
   return (
     <>
