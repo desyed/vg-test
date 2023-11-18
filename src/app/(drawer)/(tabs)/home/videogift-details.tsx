@@ -128,7 +128,6 @@ const VideoPreview = ({ item, index, drag, isActive, setSelectedVideo }) => {
 const DetailScreen = ({ videoGiftData }) => {
   const router = useRouter();
   const [data, setData] = useState([]);
-  const searchParams = useLocalSearchParams();
   const videoPreviewFlatlist = useRef(null);
   const selectedVideoRef = useRef(null);
   const [selectedVideo, setSelectedVideo] = useState({});
@@ -140,7 +139,7 @@ const DetailScreen = ({ videoGiftData }) => {
     isLoading: selectMediaIsLoading,
     refetch: refetchSelectedMedia
   } = useGetSelectedMediaQuery({
-    videoGiftId: searchParams?.videoGiftId
+    videoGiftId: videoGiftData?.videoGift?.id
   });
 
   useEffect(() => {
@@ -154,7 +153,7 @@ const DetailScreen = ({ videoGiftData }) => {
           onPress={() => {
             router.push({
               pathname: '(drawer)/(tabs)/home/recorder',
-              params: { videoGiftId: searchParams?.videoGiftId }
+              params: { videoGiftId: videoGiftData?.videoGift?.id }
             });
           }}
         />
@@ -171,7 +170,7 @@ const DetailScreen = ({ videoGiftData }) => {
         onDragEnd={({ data }) => {
           setData(data);
           triggerMoveSelectedMedia({
-            videoGiftId: searchParams?.videoGiftId,
+            videoGiftId: videoGiftData?.videoGift?.id,
             selectedMedia: data.map((item, index) => {
               return { id: item.id, order: index };
             })

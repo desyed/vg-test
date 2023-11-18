@@ -46,5 +46,6 @@ export const {
   useSelectBgMusicMutation,
   useSelectedBackgroundMusicQuery,
   useGetAllBgMusicQuery,
-  useGetBgMusicCategoriesQuery
+  useLazyGetAllBgMusicQuery,
+  useGetBgMusicCategoriesQuery,
 } = videoGiftApi;

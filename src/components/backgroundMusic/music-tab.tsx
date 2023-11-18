@@ -7,11 +7,16 @@ import { Chip, TouchableOpacity } from 'react-native-ui-lib';
 import { PrimaryButton } from '../ui/PrimaryButton';
 import { StandardContainer } from '../ui/StandardContainer';
 import { SectionTitle } from '../ui/Title';
+import { LoaderView } from "../ui/LoaderView";
 
 import hairlineWidth = StyleSheet.hairlineWidth;
 
 import { Audio } from 'expo-av';
-import { useGetBgMusicCategoriesQuery, useSelectedBackgroundMusicQuery } from "../../services/backgroundMusicApi";
+import {
+  useGetBgMusicCategoriesQuery,
+  useRemoveSelectedBackgroundMusicMutation,
+  useSelectedBackgroundMusicQuery
+} from "../../services/backgroundMusicApi";
 
 const MusicTab = ({videoGiftId}: {videoGiftId: string}) => {
   const [sound, setSound] = useState<Audio.Sound>();
@@ -54,21 +59,23 @@ const MusicTab = ({videoGiftId}: {videoGiftId: string}) => {
   }, [sound]);
 
   const router = useRouter();
-  const [data, setData] = useState<any[]>([]);
 
   const {
-    data: backgroundMusicList,
+    data,
     isLoading,
     error
   } = useSelectedBackgroundMusicQuery(videoGiftId);
 
-  if (backgroundMusicList) {
-    // debugger;
-    console.log('asdf', backgroundMusicList);
+  const [removeMusic, {data:res}] = useRemoveSelectedBackgroundMusicMutation()
+
+  const onDeleteItem = (id) => {
+    removeMusic({ videoGiftId, bgMusicId:id })
   }
 
 
+
   return (
+    <LoaderView isLoading={isLoading}>
     <View style={{ flex: 1 }}>
       <StandardContainer style={{}}>
         <PrimaryButton
@@ -77,7 +84,7 @@ const MusicTab = ({videoGiftId}: {videoGiftId: string}) => {
             stopSound()
             router.push({
               pathname: '(drawer)/(tabs)/home/add-bg-music',
-              params: { videoGiftId: 'searchParams?.videoGiftId ' }
+              params: { videoGiftId: videoGiftId }
             });
           }}
         />
@@ -121,7 +128,7 @@ const MusicTab = ({videoGiftId}: {videoGiftId: string}) => {
                   <Text>{item.name}</Text>
                   <Text>Duration: {item?.duration}</Text>
                 </View>
-                <TouchableOpacity>
+                <TouchableOpacity onPress={() => onDeleteItem(item?.id)}>
                   <View style={{height: 40, width: 40, alignItems: "center", justifyContent: 'center' }}>
                       <Ionicons color="orange" name="trash" />
                   </View>
@@ -139,6 +146,7 @@ const MusicTab = ({videoGiftId}: {videoGiftId: string}) => {
 
       </StandardContainer>
     </View>
+    </LoaderView>
   );
 };
 
