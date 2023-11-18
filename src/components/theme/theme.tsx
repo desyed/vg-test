@@ -1,8 +1,8 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useEffect, useRef, useState } from 'react';
-import { Dimensions, View, Text, StyleSheet, ScrollView } from 'react-native';
-import { Chip, TouchableOpacity } from 'react-native-ui-lib';
+import { useRouter } from 'expo-router';
+import { useEffect, useState } from 'react';
+import { View, Text, StyleSheet,  } from 'react-native';
+import { TouchableOpacity } from 'react-native-ui-lib';
 
 import {
   useGetBgMusicCategoriesQuery,
@@ -18,19 +18,25 @@ import hairlineWidth = StyleSheet.hairlineWidth;
 
 import { Audio } from 'expo-av';
 
-const MusicTab = ({ videoGiftId }: { videoGiftId: string }) => {
+const Theme = ({ videoGiftId }: { videoGiftId: string }) => {
   const [sound, setSound] = useState<Audio.Sound>();
   const [playing, setPlaying] = useState<number | string | undefined | null>();
   const { data: categories } = useGetBgMusicCategoriesQuery(null);
-  if (categories) {
-    console.log('categories', categories);
-  }
+
 
   async function playSound(item: any) {
     setPlaying(item?.id);
-    console.log('Loading Sound', item);
+    console.log('Loading Sound');
     const { sound } = await Audio.Sound.createAsync(
-      item?.backgroundMusic?.audioUrl);
+      item?.audioUrl,
+      null,
+      (status) => {
+        if (!status?.isPlaying) {
+          // setPlaying(null);
+          // console.log('sd', status);
+        }
+      }
+    );
     setSound(sound);
 
     await sound.playAsync();
@@ -67,18 +73,18 @@ const MusicTab = ({ videoGiftId }: { videoGiftId: string }) => {
       <View style={{ flex: 1 }}>
         <StandardContainer style={{}}>
           <PrimaryButton
-            label="Add Background Music"
+            label="Select Theme"
             onPress={() => {
               stopSound();
               router.push({
-                pathname: '(drawer)/(tabs)/home/add-bg-music',
+                pathname: '(drawer)/(tabs)/home/add-theme',
                 params: { videoGiftId }
               });
             }}
           />
         </StandardContainer>
         <StandardContainer>
-          <SectionTitle>Selected Background Music</SectionTitle>
+          <SectionTitle>Selected Themes</SectionTitle>
         </StandardContainer>
 
         <StandardContainer>
@@ -111,8 +117,8 @@ const MusicTab = ({ videoGiftId }: { videoGiftId: string }) => {
                       <Ionicons name={item.id === playing ? 'pause' : 'play'} />
                     </View>
                     <View style={{ flex: 1 }}>
-                      <Text>{item?.backgroundMusic?.name}</Text>
-                      <Text>Duration: {item?.backgroundMusic?.duration}</Text>
+                      <Text>{item.name}</Text>
+                      <Text>Duration: {item?.duration}</Text>
                     </View>
                     <TouchableOpacity onPress={() => onDeleteItem(item?.id)}>
                       <View
@@ -149,4 +155,4 @@ const MusicTab = ({ videoGiftId }: { videoGiftId: string }) => {
   );
 };
 
-export default MusicTab;
+export default Theme;

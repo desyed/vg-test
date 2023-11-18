@@ -36,6 +36,7 @@ import {
 import MusicTab from '../../../../components/backgroundMusic/music-tab';
 
 import hairlineWidth = StyleSheet.hairlineWidth;
+import Theme from "../../../../components/theme/theme";
 
 const Tab = createMaterialTopTabNavigator();
 const blurhash =
@@ -351,10 +352,12 @@ export default function VideoGiftDetailScreen() {
             <Tab.Screen
               name="Music"
               component={() => (
-                <MusicTab videoGiftId={searchParams?.videoGiftId} />
+                <MusicTab videoGiftId={String(searchParams?.videoGiftId)} />
               )}
             />
-            <Tab.Screen name="Theme" component={Empty} />
+            <Tab.Screen name="Theme" component={() => (
+              <Theme videoGiftId={String(searchParams?.videoGiftId)} />
+            )} />
           </Tab.Navigator>
         </View>
       </ScrollView>
