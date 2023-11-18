@@ -4,7 +4,7 @@ import { LoaderView } from 'components/ui/LoaderView';
 import { PrimaryButton } from 'components/ui/PrimaryButton';
 import { StandardContainer } from 'components/ui/StandardContainer';
 import { SectionTitle } from 'components/ui/Title';
-import { Audio, ResizeMode, Video } from "expo-av";
+import { ResizeMode, Video } from 'expo-av';
 import {
   Stack,
   useFocusEffect,
@@ -29,12 +29,13 @@ import {
   useMoveSelectedMediaOrderMutation
 } from 'services/mediaApi';
 import {
-  useGeneratePreviewMutation, useGetBackgroundMusicByVIdQuery,
+  useGeneratePreviewMutation,
   useGetVideoGiftByIdQuery
-} from "services/videoGiftApi";
-import { useSelectedBackgroundMusicQuery } from "../../../../services/backgroundMusicApi";
+} from 'services/videoGiftApi';
+
+import MusicTab from '../../../../components/backgroundMusic/music-tab';
+
 import hairlineWidth = StyleSheet.hairlineWidth;
-import MusicTab from "../../../../components/backgroundMusic/music-tab";
 
 const Tab = createMaterialTopTabNavigator();
 const blurhash =
@@ -151,6 +152,7 @@ const DetailScreen = ({ videoGiftData }) => {
         <PrimaryButton
           label="Add Media"
           onPress={() => {
+            console.info('videoGiftData ', videoGiftData);
             router.push({
               pathname: '(drawer)/(tabs)/home/recorder',
               params: { videoGiftId: videoGiftData?.videoGift?.id }
@@ -223,9 +225,6 @@ const DetailScreen = ({ videoGiftData }) => {
     </View>
   );
 };
-
-
-
 
 export default function VideoGiftDetailScreen() {
   const [showActionSheet, setShowActionSheet] = useState(false);
@@ -347,10 +346,14 @@ export default function VideoGiftDetailScreen() {
             initialLayout={{
               width: Dimensions.get('window').width
             }}
-
           >
             <Tab.Screen name="Home" component={WithDataDetailScreen} />
-            <Tab.Screen name="Music" component={() => <MusicTab videoGiftId={searchParams?.videoGiftId}/>} />
+            <Tab.Screen
+              name="Music"
+              component={() => (
+                <MusicTab videoGiftId={searchParams?.videoGiftId} />
+              )}
+            />
             <Tab.Screen name="Theme" component={Empty} />
           </Tab.Navigator>
         </View>
