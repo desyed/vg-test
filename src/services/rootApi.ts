@@ -13,13 +13,13 @@ export const rootApi = createApi({
     if (token) {
       headers.set('authentication', `Bearer ${token}`);
     }
-    console.info(
-      ' process.env.EXPO_PUBLIC_API_URL ',
-      process.env.EXPO_PUBLIC_API_URL
-    );
+    // console.info(
+    //   ' process.env.EXPO_PUBLIC_API_URL ',
+    //   process.env.EXPO_PUBLIC_API_URL
+    // );
     return headers;
   },
-  tagTypes: ['Customers', 'VideoGifts', 'SelectedMedia', 'Orders', 'Me', 'OrganizationsUsers', 'backgroundMusic'],
+  tagTypes: ['Customers', 'VideoGifts', 'SelectedMedia', 'Orders', 'Me', 'OrganizationsUsers', 'backgroundMusic', 'theme'],
 
   endpoints: () => ({})
 });

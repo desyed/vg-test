@@ -206,8 +206,11 @@ export default function Index() {
               alignItems: 'center'
             }}
           >
-            <Image source={require('../../../../../assets/empty.png')} />
-            <Text>No Orders found!</Text>
+            {isFetching || isLoading ? <Text>Loading...</Text> : (
+              <>
+                <Image source={require("../../../../../assets/empty.png")} />
+                <Text>No Orders found!</Text></>
+            )}
           </View>
         }
       />

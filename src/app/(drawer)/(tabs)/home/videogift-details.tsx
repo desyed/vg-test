@@ -12,7 +12,7 @@ import {
   useRouter
 } from 'expo-router';
 // import * as ScreenOrientation from 'expo-screen-orientation';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Dimensions, StyleSheet, View } from 'react-native';
 import DraggableFlatList, {
   ScaleDecorator
@@ -36,6 +36,7 @@ import {
 import MusicTab from '../../../../components/backgroundMusic/music-tab';
 
 import hairlineWidth = StyleSheet.hairlineWidth;
+import Theme from "../../../../components/theme/theme";
 
 const Tab = createMaterialTopTabNavigator();
 const blurhash =
@@ -129,7 +130,6 @@ const VideoPreview = ({ item, index, drag, isActive, setSelectedVideo }) => {
 const DetailScreen = ({ videoGiftData }) => {
   const router = useRouter();
   const [data, setData] = useState([]);
-  const searchParams = useLocalSearchParams();
   const videoPreviewFlatlist = useRef(null);
   const selectedVideoRef = useRef(null);
   const [selectedVideo, setSelectedVideo] = useState({});
@@ -141,7 +141,7 @@ const DetailScreen = ({ videoGiftData }) => {
     isLoading: selectMediaIsLoading,
     refetch: refetchSelectedMedia
   } = useGetSelectedMediaQuery({
-    videoGiftId: searchParams?.videoGiftId
+    videoGiftId: videoGiftData?.videoGift?.id
   });
 
   useEffect(() => {
@@ -173,7 +173,7 @@ const DetailScreen = ({ videoGiftData }) => {
         onDragEnd={({ data }) => {
           setData(data);
           triggerMoveSelectedMedia({
-            videoGiftId: searchParams?.videoGiftId,
+            videoGiftId: videoGiftData?.videoGift?.id,
             selectedMedia: data.map((item, index) => {
               return { id: item.id, order: index };
             })
@@ -237,26 +237,22 @@ export default function VideoGiftDetailScreen() {
     data: videoGiftData,
     isLoading,
     refetch: refetchVideoGift
-  } = useGetVideoGiftByIdQuery(searchParams?.videoGiftId);
+  } = useGetVideoGiftByIdQuery(searchParams?.videoGiftId, {refetchOnMountOrArgChange: true});
 
   const [generatePreview] = useGeneratePreviewMutation();
 
-  useFocusEffect(() => {
-    // setTimeout(() => {
-    //   videoPreviewFlatlist.current?.scrollToEnd({ animated: true });
-    // }, 1000);
-  });
+  const MusicTabWithVideoGift = useCallback(() => (
+    <MusicTab videoGiftId={String(searchParams?.videoGiftId)} />
+  ),[searchParams?.videoGiftId])
 
-  const WithDataDetailScreen = () => (
+  const ThemeTabWithVideoGift = useCallback(() => (
+    <Theme videoGiftId={String(searchParams?.videoGiftId)} />
+  ),[searchParams?.videoGiftId])
+
+  const WithDataDetailScreen = useCallback(() => (
     <DetailScreen videoGiftData={videoGiftData} />
-  );
-  const Empty = () => (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-      {/*musical-notes-outline*/}
-      <Ionicons name="musical-notes-outline" size={32} color="black" />
-      <Text>No Music Found!</Text>
-    </View>
-  );
+  ),[videoGiftData])
+
 
   const url = videoGiftData?.videoGift?.completedHLSUrl;
   // console.info('url', url);
@@ -351,11 +347,9 @@ export default function VideoGiftDetailScreen() {
             <Tab.Screen name="Home" component={WithDataDetailScreen} />
             <Tab.Screen
               name="Music"
-              component={() => (
-                <MusicTab videoGiftId={searchParams?.videoGiftId} />
-              )}
+              component={MusicTabWithVideoGift}
             />
-            <Tab.Screen name="Theme" component={Empty} />
+            <Tab.Screen name="Theme" component={ThemeTabWithVideoGift} />
           </Tab.Navigator>
         </View>
       </ScrollView>
