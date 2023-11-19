@@ -52,6 +52,7 @@ export default function Layout() {
   // @ts-ignore
   useEffect(() => {
     if (user?.role === 'USER') setIsUser(true);
+    if (user?.role === 'ADMIN') setIsAdmin(true);
     if (!user?.selectedOrganizationId) return;
     connectPusher(user);
     return disconnectPusher;
@@ -101,7 +102,7 @@ export default function Layout() {
               </Text>
             </View>
             <DrawerItemList {...props} />
-            {isUser && (
+            {isAdmin && (
               <DrawerItem
                 label="Organizations"
                 onPress={() => {

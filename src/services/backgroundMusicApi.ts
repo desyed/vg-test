@@ -10,12 +10,14 @@ const videoGiftApi = rootApi.injectEndpoints({
       })
     }),
     getAllBgMusic: builder.query({
+      providesTags: ['backgroundMusic'],
       query: (catId?: string) => ({
         url: `/backgroundMusic?backgroundMusicCategoryId=${catId || ''}`,
         method: 'GET'
       })
     }),
     selectBgMusic: builder.mutation({
+      invalidatesTags: ['backgroundMusic'],
       query: (body: { videoGiftId: string; backgroundMusicId: string }) => ({
         url: `/videogift/backgroundMusic`,
         method: 'POST',

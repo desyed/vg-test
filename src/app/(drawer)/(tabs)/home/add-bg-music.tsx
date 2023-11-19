@@ -1,6 +1,6 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { Audio } from 'expo-av';
-import { Stack, useLocalSearchParams, useRouter } from "expo-router";
+import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Chip, TouchableOpacity } from 'react-native-ui-lib';
@@ -22,33 +22,37 @@ const AddBgMusic = () => {
   const [selectedCat, setSelectedCat] = useState('');
   const [playing, setPlaying] = useState<number | string | undefined | null>();
   const searchParams = useLocalSearchParams();
-  async function playSound(id: string | number) {
-    setPlaying(id);
-    const { sound } = await Audio.Sound.createAsync(
-      require('../../../../images/track.wav'),
-      null,
-      (status) => {
-        if (!status?.isPlaying) {
-          // setPlaying(null);
-          // console.log('sd', status);
-        }
-      }
-    );
-    setSound(sound);
+  async function playSound(item: any) {
+    try {
+      setPlaying(item?.id);
+      // console.log('Loading Sound', item);
+      const { sound } = await Audio.Sound.createAsync(
+        {uri: item?.audioUrl});
+      setSound(sound);
+      await sound.playAsync();
+    } catch (e) {
+      console.error(e)
+    }
 
-    await sound.playAsync();
   }
 
   async function stopSound() {
     setPlaying(null);
-    await sound.stopAsync();
+    try {
+      await sound?.stopAsync();
+    } catch (e) {
+      console.error(e);
+    }
   }
 
   useEffect(() => {
     return sound
       ? () => {
-          console.log('Unloading Sound');
+        try {
           sound.unloadAsync();
+          } catch (e) {
+          console.log(e)
+        }
         }
       : undefined;
   }, [sound]);
@@ -57,7 +61,7 @@ const AddBgMusic = () => {
 
   const [getMusics, { data, isLoading }] = useLazyGetAllBgMusicQuery();
 
-  if(data){
+  if (data) {
     console.log('music', data);
   }
 
@@ -65,11 +69,14 @@ const AddBgMusic = () => {
     useSelectBgMusicMutation();
 
   const onSelectMusic = (id) => {
-    selectBgMusic({ videoGiftId: String(searchParams?.videoGiftId), backgroundMusicId: id })
-  }
+    selectBgMusic({
+      videoGiftId: String(searchParams?.videoGiftId),
+      backgroundMusicId: id
+    });
+  };
 
-  if(!selectLoading && res ){
-    router.back()
+  if (!selectLoading && res) {
+    router.back();
   }
 
   useEffect(() => {
@@ -79,7 +86,7 @@ const AddBgMusic = () => {
   const changeSelectedCat = (catId) => {
     setSelectedCat(catId);
     // get musics
-    getMusics(catId)
+    getMusics(catId);
   };
 
   const { data: category } = useGetBgMusicCategoriesQuery('');
@@ -117,6 +124,7 @@ const AddBgMusic = () => {
                 category.data.map((cat) => {
                   return (
                     <TouchableOpacity
+                      key={cat?.id}
                       onPress={() => changeSelectedCat(cat?.id)}
                     >
                       <View
@@ -145,6 +153,7 @@ const AddBgMusic = () => {
                 data.data.map((item: any) => {
                   return (
                     <TouchableOpacity
+                      key={item?.id}
                       onPress={
                         () => onSelectMusic(item?.id)
                         // item.id === playing ? stopSound : () => playSound(item.id)
@@ -167,7 +176,7 @@ const AddBgMusic = () => {
                           onPress={
                             item.id === playing
                               ? stopSound
-                              : () => playSound(item.id)
+                              : () => playSound(item)
                           }
                         >
                           <View

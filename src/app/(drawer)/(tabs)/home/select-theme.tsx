@@ -3,21 +3,22 @@ import { Audio } from 'expo-av';
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
-import { TouchableOpacity } from 'react-native-ui-lib';
+import { BorderRadiuses, Chip, Colors, Image, ListItem, TouchableOpacity } from "react-native-ui-lib";
 
 import { KeyboardAvoidingWrapper } from '../../../../components/ui/KeyboardAvoidingWrapper';
 import { LoaderView } from '../../../../components/ui/LoaderView';
 import { StandardContainer } from '../../../../components/ui/StandardContainer';
 import { SectionTitle } from '../../../../components/ui/Title';
 import {
-  useGetBgMusicCategoriesQuery,
   useLazyGetAllBgMusicQuery,
   useSelectBgMusicMutation
 } from '../../../../services/backgroundMusicApi';
 
 import hairlineWidth = StyleSheet.hairlineWidth;
+import { useGetThemeCategoriesQuery, useLazyGetAllThemesQuery } from "../../../../services/themesApi";
+import { usePatchVideoGiftMutation } from "../../../../services/videoGiftApi";
 
-const AddTheme = () => {
+const SelectTheme = () => {
 
   const [selectedCat, setSelectedCat] = useState('');
 
@@ -25,34 +26,34 @@ const AddTheme = () => {
 
   const router = useRouter();
 
-  const [getMusics, { data, isLoading }] = useLazyGetAllBgMusicQuery();
 
 
-  const [selectBgMusic, { data: res, isLoading: selectLoading }] =
-    useSelectBgMusicMutation();
-
-  const onSelectMusic = (id) => {
-    selectBgMusic({ videoGiftId: String(searchParams?.videoGiftId), backgroundMusicId: id })
+  const [getThemes, { data, isLoading }] = useLazyGetAllThemesQuery();
+  const [patchVideoGift, {data: res, isLoading: patchLoading}] = usePatchVideoGiftMutation()
+  const onSelectTheme = (item: any) => {
+    patchVideoGift({id: searchParams?.videoGiftId, themeId: item.id})
   }
 
-  if(!selectLoading && res ){
+  if(!patchLoading && res){
     router.back()
   }
 
   useEffect(() => {
-    getMusics('');
+    getThemes('');
   }, []);
+
+
 
   const changeSelectedCat = (catId) => {
     setSelectedCat(catId);
     // get musics
-    getMusics(catId)
+    getThemes(catId)
   };
 
-  const { data: category } = useGetBgMusicCategoriesQuery('');
+  const { data: category } = useGetThemeCategoriesQuery('');
 
   return (
-    <LoaderView isLoading={isLoading || selectLoading}>
+    <LoaderView isLoading={isLoading}>
       <KeyboardAvoidingWrapper>
         <>
           <StandardContainer>
@@ -80,10 +81,11 @@ const AddTheme = () => {
               </TouchableOpacity>
 
               {category &&
-                Array.isArray(category?.data) &&
-                category.data.map((cat) => {
+                Array.isArray(category) &&
+                category.map((cat) => {
                   return (
                     <TouchableOpacity
+                      key={cat?.id}
                       onPress={() => changeSelectedCat(cat?.id)}
                     >
                       <View
@@ -106,56 +108,37 @@ const AddTheme = () => {
                 })}
             </ScrollView>
           </StandardContainer>
-          <StandardContainer>
+          <StandardContainer style={{flex: 1}}>
             <ScrollView>
-              {data && Array.isArray(data?.data) && data.data.length > 0 ? (
-                data.data.map((item: any) => {
+              {data && Array.isArray(data) && data.length > 0 ? (
+                data.map((item: any) => {
                   return (
-                    <TouchableOpacity
-                      onPress={
-                        () => onSelectMusic(item?.id)
-                        // item.id === playing ? stopSound : () => playSound(item.id)
-                      }
-                    >
-                      <View
+                    <TouchableOpacity key={item.id}>
+                      <ListItem
                         style={{
-                          flexDirection: 'row',
-                          gap: 10,
-                          alignItems: 'center',
-                          padding: 10,
-                          marginBottom: 10,
                           borderRadius: 5,
-                          borderBottomWidth: hairlineWidth,
-                          borderColor: '#fff',
-                          backgroundColor: 'lightgray'
+                          backgroundColor: 'lightgray',
+                          marginBottom: 10
                         }}
+                        activeBackgroundColor={Colors.grey60}
+                        activeOpacity={0.3}
+                        height={70}
+                        onPress={() => onSelectTheme(item)}
                       >
-                        <TouchableOpacity
-                          onPress={
-                            item.id === playing
-                              ? stopSound
-                              : () => playSound(item.id)
-                          }
-                        >
-                          <View
-                            style={{
-                              backgroundColor: 'white',
-                              padding: 10,
-                              borderRadius: 50
-                            }}
-                          >
-                            <Ionicons
-                              name={item.id === playing ? 'pause' : 'play'}
-                            />
-                          </View>
-                        </TouchableOpacity>
-                        <View style={{ flex: 1 }}>
-                          <Text style={{ fontWeight: 'bold' }}>
-                            {item?.name}
-                          </Text>
-                          {/*<Text>Category: </Text>*/}
-                        </View>
-                      </View>
+                        <ListItem.Part left>
+                          <Image source={{uri: item.previewImageUrl}} style={styles.image}/>
+                        </ListItem.Part>
+                        <ListItem.Part middle column containerStyle={{paddingRight: 17}}>
+                          <ListItem.Part containerStyle={{}}>
+                            <Text style={{flex: 1, marginRight: 10, fontWeight: 'bold'}} numberOfLines={1}>
+                              {item.title}
+                            </Text>
+                            <Text style={{marginTop: 2}}>
+                              <Chip label={'Select'} />
+                            </Text>
+                          </ListItem.Part>
+                        </ListItem.Part>
+                      </ListItem>
                     </TouchableOpacity>
                   );
                 })
@@ -170,11 +153,11 @@ const AddTheme = () => {
                 >
                   {/*musical-notes-outline*/}
                   <Ionicons
-                    name="musical-notes-outline"
+                    name="albums-outline"
                     size={32}
                     color="black"
                   />
-                  <Text>No Music Found!</Text>
+                  <Text>No Theme Found!</Text>
                 </View>
               )}
             </ScrollView>
@@ -198,7 +181,18 @@ const styles = StyleSheet.create({
     borderRadius: 50,
     borderWidth: hairlineWidth,
     borderColor: 'gray'
+  },
+  image: {
+    width: 54,
+    height: 54,
+    borderRadius: BorderRadiuses.br20,
+    marginHorizontal: 14,
+    backgroundColor: 'white'
+  },
+  border: {
+    // borderBottomWidth: StyleSheet.hairlineWidth,
+    // borderColor: Colors.grey70
   }
 });
 
-export default AddTheme;
+export default SelectTheme;

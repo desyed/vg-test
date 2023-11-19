@@ -29,8 +29,7 @@ const MusicTab = ({ videoGiftId }: { videoGiftId: string }) => {
   async function playSound(item: any) {
     setPlaying(item?.id);
     console.log('Loading Sound', item);
-    const { sound } = await Audio.Sound.createAsync(
-      item?.backgroundMusic?.audioUrl);
+    const { sound } = await Audio.Sound.createAsync({uri: item?.backgroundMusic?.audioUrl});
     setSound(sound);
 
     await sound.playAsync();
@@ -38,7 +37,11 @@ const MusicTab = ({ videoGiftId }: { videoGiftId: string }) => {
 
   async function stopSound() {
     setPlaying(null);
-    await sound.stopAsync();
+    try {
+      await sound?.stopAsync();
+    } catch (e) {
+      console.error(e);
+    }
   }
 
   useEffect(() => {
@@ -55,7 +58,7 @@ const MusicTab = ({ videoGiftId }: { videoGiftId: string }) => {
   const { data, isLoading, error } =
     useSelectedBackgroundMusicQuery(videoGiftId);
 
-  const [removeMusic, { data: res }] =
+  const [removeMusic, { data: res, isLoading: deleteLoading }] =
     useRemoveSelectedBackgroundMusicMutation();
 
   const onDeleteItem = (id) => {
@@ -63,7 +66,7 @@ const MusicTab = ({ videoGiftId }: { videoGiftId: string }) => {
   };
 
   return (
-    <LoaderView isLoading={isLoading}>
+    <LoaderView isLoading={isLoading || deleteLoading}>
       <View style={{ flex: 1 }}>
         <StandardContainer style={{}}>
           <PrimaryButton
@@ -86,6 +89,7 @@ const MusicTab = ({ videoGiftId }: { videoGiftId: string }) => {
             data.map((item: any) => {
               return (
                 <TouchableOpacity
+                  key={item.id}
                   onPress={
                     item.id === playing ? stopSound : () => playSound(item)
                   }
@@ -95,10 +99,12 @@ const MusicTab = ({ videoGiftId }: { videoGiftId: string }) => {
                       flexDirection: 'row',
                       gap: 10,
                       alignItems: 'center',
-                      paddingBottom: 10,
+                      padding: 10,
                       marginBottom: 10,
+                      borderRadius: 5,
                       borderBottomWidth: hairlineWidth,
-                      borderColor: '#fff'
+                      borderColor: '#fff',
+                      backgroundColor: 'lightgray'
                     }}
                   >
                     <View
@@ -120,10 +126,12 @@ const MusicTab = ({ videoGiftId }: { videoGiftId: string }) => {
                           height: 40,
                           width: 40,
                           alignItems: 'center',
-                          justifyContent: 'center'
+                          justifyContent: 'center',
+                          backgroundColor: '#ffffff40',
+                          borderRadius: 5
                         }}
                       >
-                        <Ionicons color="orange" name="trash" />
+                        <Ionicons size={16} color="orange" name="trash" />
                       </View>
                     </TouchableOpacity>
                   </View>

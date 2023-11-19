@@ -12,7 +12,7 @@ import {
   useRouter
 } from 'expo-router';
 // import * as ScreenOrientation from 'expo-screen-orientation';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Dimensions, StyleSheet, View } from 'react-native';
 import DraggableFlatList, {
   ScaleDecorator
@@ -237,26 +237,22 @@ export default function VideoGiftDetailScreen() {
     data: videoGiftData,
     isLoading,
     refetch: refetchVideoGift
-  } = useGetVideoGiftByIdQuery(searchParams?.videoGiftId);
+  } = useGetVideoGiftByIdQuery(searchParams?.videoGiftId, {refetchOnMountOrArgChange: true});
 
   const [generatePreview] = useGeneratePreviewMutation();
 
-  useFocusEffect(() => {
-    // setTimeout(() => {
-    //   videoPreviewFlatlist.current?.scrollToEnd({ animated: true });
-    // }, 1000);
-  });
+  const MusicTabWithVideoGift = useCallback(() => (
+    <MusicTab videoGiftId={String(searchParams?.videoGiftId)} />
+  ),[searchParams?.videoGiftId])
 
-  const WithDataDetailScreen = () => (
+  const ThemeTabWithVideoGift = useCallback(() => (
+    <Theme videoGiftId={String(searchParams?.videoGiftId)} />
+  ),[searchParams?.videoGiftId])
+
+  const WithDataDetailScreen = useCallback(() => (
     <DetailScreen videoGiftData={videoGiftData} />
-  );
-  const Empty = () => (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-      {/*musical-notes-outline*/}
-      <Ionicons name="musical-notes-outline" size={32} color="black" />
-      <Text>No Music Found!</Text>
-    </View>
-  );
+  ),[videoGiftData])
+
 
   const url = videoGiftData?.videoGift?.completedHLSUrl;
   // console.info('url', url);
@@ -351,13 +347,9 @@ export default function VideoGiftDetailScreen() {
             <Tab.Screen name="Home" component={WithDataDetailScreen} />
             <Tab.Screen
               name="Music"
-              component={() => (
-                <MusicTab videoGiftId={String(searchParams?.videoGiftId)} />
-              )}
+              component={MusicTabWithVideoGift}
             />
-            <Tab.Screen name="Theme" component={() => (
-              <Theme videoGiftId={String(searchParams?.videoGiftId)} />
-            )} />
+            <Tab.Screen name="Theme" component={ThemeTabWithVideoGift} />
           </Tab.Navigator>
         </View>
       </ScrollView>

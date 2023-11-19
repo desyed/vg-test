@@ -9,7 +9,14 @@ const videoGiftApi = rootApi.injectEndpoints({
       }),
       providesTags: ['VideoGifts']
     }),
-
+    patchVideoGift: builder.mutation({
+      invalidatesTags: ['VideoGifts'],
+      query: ({ id, ...body }) => ({
+        url: `videogift/${id}`,
+        method: 'PATCH',
+        body
+      })
+    }),
     generatePreview: builder.mutation({
       query: (payload) => ({
         url: '/videogift/output',
@@ -24,5 +31,6 @@ const videoGiftApi = rootApi.injectEndpoints({
 export const {
   useGeneratePreviewMutation,
   useGetVideoGiftByIdQuery,
-  useLazyGetVideoGiftByIdQuery
+  useLazyGetVideoGiftByIdQuery,
+  usePatchVideoGiftMutation
 } = videoGiftApi;
