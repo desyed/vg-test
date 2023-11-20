@@ -1,11 +1,11 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useEffect, useRef, useState } from 'react';
-import { Dimensions, View, Text, StyleSheet, ScrollView } from 'react-native';
-import { Chip, TouchableOpacity } from 'react-native-ui-lib';
+import { Audio } from 'expo-av';
+import { useRouter } from 'expo-router';
+import { useEffect, useState } from 'react';
+import { View, Text, StyleSheet } from 'react-native';
+import { TouchableOpacity } from 'react-native-ui-lib';
 
 import {
-  useGetBgMusicCategoriesQuery,
   useRemoveSelectedBackgroundMusicMutation,
   useSelectedBackgroundMusicQuery
 } from '../../services/backgroundMusicApi';
@@ -14,22 +14,17 @@ import { PrimaryButton } from '../ui/PrimaryButton';
 import { StandardContainer } from '../ui/StandardContainer';
 import { SectionTitle } from '../ui/Title';
 
-import hairlineWidth = StyleSheet.hairlineWidth;
-
-import { Audio } from 'expo-av';
+const hairlineWidth = StyleSheet.hairlineWidth;
 
 const MusicTab = ({ videoGiftId }: { videoGiftId: string }) => {
   const [sound, setSound] = useState<Audio.Sound>();
   const [playing, setPlaying] = useState<number | string | undefined | null>();
-  const { data: categories } = useGetBgMusicCategoriesQuery(null);
-  if (categories) {
-    console.log('categories', categories);
-  }
 
   async function playSound(item: any) {
     setPlaying(item?.id);
-    console.log('Loading Sound', item);
-    const { sound } = await Audio.Sound.createAsync({uri: item?.backgroundMusic?.audioUrl});
+    const { sound } = await Audio.Sound.createAsync({
+      uri: item?.backgroundMusic?.audioUrl
+    });
     setSound(sound);
 
     await sound.playAsync();
@@ -55,10 +50,10 @@ const MusicTab = ({ videoGiftId }: { videoGiftId: string }) => {
 
   const router = useRouter();
 
-  const { data, isLoading, error } =
+  const { data, isLoading, isFetching, error } =
     useSelectedBackgroundMusicQuery(videoGiftId);
 
-  const [removeMusic, { data: res, isLoading: deleteLoading }] =
+  const [removeMusic, { data: deleteRes, isLoading: deleteLoading }] =
     useRemoveSelectedBackgroundMusicMutation();
 
   const onDeleteItem = (id) => {
@@ -66,7 +61,7 @@ const MusicTab = ({ videoGiftId }: { videoGiftId: string }) => {
   };
 
   return (
-    <LoaderView isLoading={isLoading || deleteLoading}>
+    <LoaderView isLoading={isLoading || isFetching || deleteLoading}>
       <View style={{ flex: 1 }}>
         <StandardContainer style={{}}>
           <PrimaryButton
