@@ -5,14 +5,9 @@ import { PrimaryButton } from 'components/ui/PrimaryButton';
 import { StandardContainer } from 'components/ui/StandardContainer';
 import { SectionTitle } from 'components/ui/Title';
 import { ResizeMode, Video } from 'expo-av';
-import {
-  Stack,
-  useFocusEffect,
-  useLocalSearchParams,
-  useRouter
-} from 'expo-router';
+import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 // import * as ScreenOrientation from 'expo-screen-orientation';
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Dimensions, StyleSheet, View } from 'react-native';
 import DraggableFlatList, {
   ScaleDecorator
@@ -36,11 +31,10 @@ import {
 import MusicTab from '../../../../components/backgroundMusic/music-tab';
 
 import hairlineWidth = StyleSheet.hairlineWidth;
-import Theme from "../../../../components/theme/theme";
+
+import Theme from '../../../../components/theme/theme';
 
 const Tab = createMaterialTopTabNavigator();
-const blurhash =
-  '|rF?hV%2WCj[ayj[a|j[az_NaeWBj@ayfRayfQfQM{M|azj[azf6fQfQfQIpWXofj[ayj[j[fQayWCoeoeaya}j[ayfQa{oLj?j[WVj[ayayj[fQoff7azayj[ayj[j[ayofayayayj[fQj[ayayj[ayfjj[j[ayjuayj[';
 
 const PREVIEW_WIDTH = 120;
 // async function changeScreenOrientationLandscape() {
@@ -237,22 +231,26 @@ export default function VideoGiftDetailScreen() {
     data: videoGiftData,
     isLoading,
     refetch: refetchVideoGift
-  } = useGetVideoGiftByIdQuery(searchParams?.videoGiftId, {refetchOnMountOrArgChange: true});
+  } = useGetVideoGiftByIdQuery(searchParams?.videoGiftId, {
+    refetchOnMountOrArgChange: true
+  });
 
   const [generatePreview] = useGeneratePreviewMutation();
 
-  const MusicTabWithVideoGift = useCallback(() => (
-    <MusicTab videoGiftId={String(searchParams?.videoGiftId)} />
-  ),[searchParams?.videoGiftId])
+  const MusicTabWithVideoGift = useCallback(
+    () => <MusicTab videoGiftId={String(searchParams?.videoGiftId)} />,
+    [searchParams?.videoGiftId]
+  );
 
-  const ThemeTabWithVideoGift = useCallback(() => (
-    <Theme videoGiftId={String(searchParams?.videoGiftId)} />
-  ),[searchParams?.videoGiftId])
+  const ThemeTabWithVideoGift = useCallback(
+    () => <Theme videoGiftId={String(searchParams?.videoGiftId)} />,
+    [searchParams?.videoGiftId]
+  );
 
-  const WithDataDetailScreen = useCallback(() => (
-    <DetailScreen videoGiftData={videoGiftData} />
-  ),[videoGiftData])
-
+  const WithDataDetailScreen = useCallback(
+    () => <DetailScreen videoGiftData={videoGiftData} />,
+    [videoGiftData]
+  );
 
   const url = videoGiftData?.videoGift?.completedHLSUrl;
   // console.info('url', url);
@@ -344,11 +342,8 @@ export default function VideoGiftDetailScreen() {
               width: Dimensions.get('window').width
             }}
           >
-            <Tab.Screen name="Home" component={WithDataDetailScreen} />
-            <Tab.Screen
-              name="Music"
-              component={MusicTabWithVideoGift}
-            />
+            <Tab.Screen name="Media" component={WithDataDetailScreen} />
+            <Tab.Screen name="Music" component={MusicTabWithVideoGift} />
             <Tab.Screen name="Theme" component={ThemeTabWithVideoGift} />
           </Tab.Navigator>
         </View>
