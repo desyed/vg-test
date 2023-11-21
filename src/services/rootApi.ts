@@ -6,20 +6,32 @@ console.info(
 // Define a service using a base URL and expected endpoints
 export const rootApi = createApi({
   reducerPath: 'videoGiftApi',
-  baseQuery: fetchBaseQuery({ baseUrl: process.env.EXPO_PUBLIC_API_URL }),
-  prepareHeaders: (headers, { getState }) => {
-    // By default, if we have a token in the store, let's use that for authenticated requests
-    const token = getState().auth.token;
-    if (token) {
-      headers.set('authentication', `Bearer ${token}`);
-    }
-    // console.info(
-    //   ' process.env.EXPO_PUBLIC_API_URL ',
-    //   process.env.EXPO_PUBLIC_API_URL
-    // );
-    return headers;
-  },
-  tagTypes: ['Customers', 'VideoGifts', 'SelectedMedia', 'Orders', 'Me', 'OrganizationsUsers', 'backgroundMusic', 'theme'],
+  baseQuery: fetchBaseQuery({
+    prepareHeaders: (headers, { getState }) => {
+      // By default, if we have a token in the store, let's use that for authenticated requests
+      const token = getState().auth.token;
+      if (token) {
+        headers.set('authentication', `Bearer ${token}`);
+      }
+      // console.info(
+      //   ' process.env.EXPO_PUBLIC_API_URL ',
+      //   process.env.EXPO_PUBLIC_API_URL
+      // );
+      return headers;
+    },
+    baseUrl: process.env.EXPO_PUBLIC_API_URL
+  }),
+
+  tagTypes: [
+    'Customers',
+    'VideoGifts',
+    'SelectedMedia',
+    'Orders',
+    'Me',
+    'OrganizationsUsers',
+    'backgroundMusic',
+    'theme'
+  ],
 
   endpoints: () => ({})
 });

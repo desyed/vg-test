@@ -628,6 +628,9 @@ PODS:
   - RNScreens (3.22.1):
     - React-Core
     - React-RCTImage
+  - RNSentry (5.13.0):
+    - React-Core
+    - Sentry/HybridSDK (= 8.15.2)
   - RNStaticSafeAreaInsets (2.2.0):
     - React-Core
   - RNSVG (13.9.0):
@@ -646,6 +649,9 @@ PODS:
   - SDWebImageWebPCoder (0.11.0):
     - libwebp (~> 1.0)
     - SDWebImage/Core (~> 5.15)
+  - Sentry/HybridSDK (8.15.2):
+    - SentryPrivate (= 8.15.2)
+  - SentryPrivate (8.15.2)
   - SocketRocket (0.6.1)
   - Toast (4.0.0)
   - TweetNacl (1.0.2)
@@ -734,6 +740,7 @@ DEPENDENCIES:
   - RNGestureHandler (from `../node_modules/react-native-gesture-handler`)
   - RNReanimated (from `../node_modules/react-native-reanimated`)
   - RNScreens (from `../node_modules/react-native-screens`)
+  - "RNSentry (from `../node_modules/@sentry/react-native`)"
   - RNStaticSafeAreaInsets (from `../node_modules/react-native-static-safe-area-insets`)
   - RNSVG (from `../node_modules/react-native-svg`)
   - RNVectorIcons (from `../node_modules/react-native-vector-icons`)
@@ -755,6 +762,8 @@ SPEC REPOS:
     - SDWebImageAVIFCoder
     - SDWebImageSVGCoder
     - SDWebImageWebPCoder
+    - Sentry
+    - SentryPrivate
     - SocketRocket
     - Toast
     - TweetNacl
@@ -912,6 +921,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-reanimated"
   RNScreens:
     :path: "../node_modules/react-native-screens"
+  RNSentry:
+    :path: "../node_modules/@sentry/react-native"
   RNStaticSafeAreaInsets:
     :path: "../node_modules/react-native-static-safe-area-insets"
   RNSVG:
@@ -1007,6 +1018,7 @@ SPEC CHECKSUMS:
   RNGestureHandler: c0d04458598fcb26052494ae23dda8f8f5162b13
   RNReanimated: 9f7068e43b9358a46a688d94a5a3adb258139457
   RNScreens: 50ffe2fa2342eabb2d0afbe19f7c1af286bc7fb3
+  RNSentry: 82667e9889782365bf801645ef4d2a731dcf60df
   RNStaticSafeAreaInsets: 055ddbf5e476321720457cdaeec0ff2ba40ec1b8
   RNSVG: 53c661b76829783cdaf9b7a57258f3d3b4c28315
   RNVectorIcons: 23b6e11af4aaf104d169b1b0afa7e5cf96c676ce
@@ -1014,6 +1026,8 @@ SPEC CHECKSUMS:
   SDWebImageAVIFCoder: 8348fef6d0ec69e129c66c9fe4d74fbfbf366112
   SDWebImageSVGCoder: 15a300a97ec1c8ac958f009c02220ac0402e936c
   SDWebImageWebPCoder: 295a6573c512f54ad2dd58098e64e17dcf008499
+  Sentry: 6f5742b4c47c17c9adcf265f6f328cf4a0ed1923
+  SentryPrivate: b2f7996f37781080f04a946eb4e377ff63c64195
   SocketRocket: f32cd54efbe0f095c4d7594881e52619cfe80b17
   Toast: 91b396c56ee72a5790816f40d3a94dd357abc196
   TweetNacl: 3abf4d1d2082b0114e7a67410e300892448951e6
@@ -1022,4 +1036,4 @@ SPEC CHECKSUMS:
 
 PODFILE CHECKSUM: ee86f043acbfbaee698adb554e5b7f8802fe471f
 
-COCOAPODS: 1.14.2
+COCOAPODS: 1.12.1
