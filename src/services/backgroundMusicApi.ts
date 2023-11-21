@@ -11,8 +11,10 @@ const videoGiftApi = rootApi.injectEndpoints({
     }),
     getAllBgMusic: builder.query({
       providesTags: ['backgroundMusic'],
-      query: (catId?: string) => ({
-        url: `/backgroundMusic?backgroundMusicCategoryId=${catId || ''}`,
+      query: ({catId, page}:{catId?: string, page?: number}) => ({
+        url: `/backgroundMusic?backgroundMusicCategoryId=${catId || ''}&page=${
+          page || 1
+        }`,
         method: 'GET'
       })
     }),
