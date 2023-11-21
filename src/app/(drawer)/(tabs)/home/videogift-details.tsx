@@ -143,7 +143,6 @@ const DetailScreen = ({ videoGiftData }) => {
         <PrimaryButton
           label="Add Media"
           onPress={() => {
-            console.info('videoGiftData ', videoGiftData);
             router.push({
               pathname: '(drawer)/(tabs)/home/recorder',
               params: { videoGiftId: videoGiftData?.videoGift?.id }
@@ -171,6 +170,7 @@ const DetailScreen = ({ videoGiftData }) => {
         }}
         keyExtractor={(item) => item.id}
         renderItem={({ item, index, drag, isActive }) => {
+          console.info('item ', item);
           return (
             <VideoPreview
               item={item}
@@ -261,7 +261,6 @@ export default function VideoGiftDetailScreen() {
               onPress={() => {
                 setShowActionSheet(true);
               }}
-              title="Update count"
             >
               <View style={{ padding: 10 }}>
                 <Ionicons
@@ -280,7 +279,7 @@ export default function VideoGiftDetailScreen() {
             flex: 1,
             justifyContent: 'flex-start',
             alignItems: 'stretch',
-            height: windowHeight - 200,
+            height: windowHeight - 175,
             width: '100%'
           }}
         >
