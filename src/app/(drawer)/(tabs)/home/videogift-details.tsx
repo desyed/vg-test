@@ -287,7 +287,7 @@ export default function VideoGiftDetailScreen() {
           {(videoGiftData?.videoGift?.previewStatus === 'COMPLETED' &&
             videoGiftData?.videoGift?.signedPreviewUrl?.url) ||
           (videoGiftData?.videoGift?.completedVideoStatus === 'COMPLETED' &&
-            videoGiftData?.videoGift?.signedCompletedUrl?.url) ? (
+            videoGiftData?.videoGift?.completedHLSUrl) ? (
             <Video
               // ref={video}
               style={{
@@ -296,7 +296,7 @@ export default function VideoGiftDetailScreen() {
                 height: 200
               }}
               source={{
-                uri: url || videoGiftData?.videoGift?.signedPreviewUrl?.url
+                uri: url || videoGiftData?.videoGift?.completedHLSUrl
               }}
               // shouldPlay
               useNativeControls
