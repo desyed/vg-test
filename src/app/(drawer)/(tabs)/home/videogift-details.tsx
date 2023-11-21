@@ -119,7 +119,7 @@ const DetailScreen = ({ videoGiftData }) => {
   const router = useRouter();
   const [data, setData] = useState([]);
   const videoPreviewFlatlist = useRef(null);
-
+  const windowWidth = Dimensions.get('window').width;
 
 
   const [triggerMoveSelectedMedia] = useMoveSelectedMediaOrderMutation();
@@ -150,7 +150,7 @@ const DetailScreen = ({ videoGiftData }) => {
       </StandardContainer>
       <StandardContainer >
         <SectionTitle>{videoGiftData?.videoGift?.title}</SectionTitle>
-        <Text style={{color: Colors.yellow5}}>* Long press item to rearrange and click to edit</Text>
+        {data && <Text style={{ color: Colors.yellow5 }}>* Long press item to rearrange or click to edit</Text>}
       </StandardContainer>
       <StandardContainer style={{marginTop: 0}}>
         <DraggableFlatList
@@ -183,6 +183,10 @@ const DetailScreen = ({ videoGiftData }) => {
           renderPlaceholder={() => (
             <View style={{ flex: 1, backgroundColor: 'lightgray' }} />
           )}
+          ListEmptyComponent={<View>
+            {selectMediaIsLoading ? <Text>Loading...</Text> :<Text style={{ color: Colors.yellow5 }}><Ionicons size={18} name="information-circle-outline" /> No Media
+              added! Please add Media.</Text>}
+            </View>}
           // numColumns={3}
         />
       </StandardContainer>
