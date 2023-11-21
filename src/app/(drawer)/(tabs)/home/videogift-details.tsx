@@ -133,7 +133,7 @@ const DetailScreen = ({ videoGiftData }) => {
   } = useGetSelectedMediaQuery({
     videoGiftId: videoGiftData?.videoGift?.id
   });
-
+  console.info('selectedMedia ', selectedMedia);
   useEffect(() => {
     setData(selectedMedia);
   }, [selectedMedia]);
@@ -171,6 +171,7 @@ const DetailScreen = ({ videoGiftData }) => {
         }}
         keyExtractor={(item) => item.id}
         renderItem={({ item, index, drag, isActive }) => {
+          console.info('item ', item);
           return (
             <VideoPreview
               item={item}
@@ -261,7 +262,6 @@ export default function VideoGiftDetailScreen() {
               onPress={() => {
                 setShowActionSheet(true);
               }}
-              title="Update count"
             >
               <View style={{ padding: 10 }}>
                 <Ionicons
@@ -280,7 +280,7 @@ export default function VideoGiftDetailScreen() {
             flex: 1,
             justifyContent: 'flex-start',
             alignItems: 'stretch',
-            height: windowHeight - 200,
+            height: windowHeight - 175,
             width: '100%'
           }}
         >
