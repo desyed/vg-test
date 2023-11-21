@@ -1,6 +1,5 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useRouter } from 'expo-router';
-import { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import {
   BorderRadiuses,
@@ -8,57 +7,25 @@ import {
   ListItem,
   TouchableOpacity,
   Image,
-  Chip
 } from 'react-native-ui-lib';
 
-import {
-  useGetBgMusicCategoriesQuery,
-  useRemoveSelectedBackgroundMusicMutation,
-  useSelectedBackgroundMusicQuery
-} from '../../services/backgroundMusicApi';
-import {
-  useGetThemeCategoriesQuery,
-  useLazyGetAllThemesQuery
-} from '../../services/themesApi';
 import { useGetVideoGiftByIdQuery } from '../../services/videoGiftApi';
 import { LoaderView } from '../ui/LoaderView';
 import { PrimaryButton } from '../ui/PrimaryButton';
 import { StandardContainer } from '../ui/StandardContainer';
 import { SectionTitle } from '../ui/Title';
 
-import hairlineWidth = StyleSheet.hairlineWidth;
-
-import { Audio } from 'expo-av';
+const hairlineWidth = StyleSheet.hairlineWidth;
 
 const Theme = ({ videoGiftId }: { videoGiftId: string }) => {
-  const [selectedCat, setSelectedCat] = useState('');
-  const { data: videoGiftDetails, isLoading: videoGiftLoading } =
+  const { data: videoGiftDetails, isLoading, isFetching } =
     useGetVideoGiftByIdQuery(videoGiftId);
 
   const router = useRouter();
 
-  const [removeMusic, { data: res }] =
-    useRemoveSelectedBackgroundMusicMutation();
-
-  const onDeleteItem = (id) => {
-    removeMusic({ videoGiftId, bgMusicId: id });
-  };
-  const [getThemes, { data, isLoading }] = useLazyGetAllThemesQuery();
-
-  useEffect(() => {
-    getThemes('');
-  }, []);
-
-  const changeSelectedCat = (catId) => {
-    setSelectedCat(catId);
-    // get musics
-    getThemes(catId);
-  };
-
-  const { data: category } = useGetThemeCategoriesQuery('');
 
   return (
-    <LoaderView isLoading={isLoading}>
+    <LoaderView isLoading={isLoading || isFetching}>
       <View style={{ flex: 1 }}>
         <StandardContainer style={{}}>
           <PrimaryButton

@@ -1,59 +1,61 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { Audio } from 'expo-av';
-import { Stack, useLocalSearchParams, useRouter } from "expo-router";
+import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
-import { BorderRadiuses, Chip, Colors, Image, ListItem, TouchableOpacity } from "react-native-ui-lib";
+import {
+  BorderRadiuses,
+  Chip,
+  Colors,
+  Image,
+  ListItem,
+  TouchableOpacity
+} from 'react-native-ui-lib';
 
 import { KeyboardAvoidingWrapper } from '../../../../components/ui/KeyboardAvoidingWrapper';
 import { LoaderView } from '../../../../components/ui/LoaderView';
 import { StandardContainer } from '../../../../components/ui/StandardContainer';
 import { SectionTitle } from '../../../../components/ui/Title';
-import {
-  useLazyGetAllBgMusicQuery,
-  useSelectBgMusicMutation
-} from '../../../../services/backgroundMusicApi';
 
-import hairlineWidth = StyleSheet.hairlineWidth;
-import { useGetThemeCategoriesQuery, useLazyGetAllThemesQuery } from "../../../../services/themesApi";
-import { usePatchVideoGiftMutation } from "../../../../services/videoGiftApi";
+const hairlineWidth = StyleSheet.hairlineWidth;
+
+import {
+  useGetThemeCategoriesQuery,
+  useLazyGetAllThemesQuery
+} from '../../../../services/themesApi';
+import { usePatchVideoGiftMutation } from '../../../../services/videoGiftApi';
 
 const SelectTheme = () => {
-
   const [selectedCat, setSelectedCat] = useState('');
 
   const searchParams = useLocalSearchParams();
 
   const router = useRouter();
 
-
-
-  const [getThemes, { data, isLoading }] = useLazyGetAllThemesQuery();
-  const [patchVideoGift, {data: res, isLoading: patchLoading}] = usePatchVideoGiftMutation()
+  const [getThemes, { data, isLoading, isFetching }] = useLazyGetAllThemesQuery();
+  const [patchVideoGift, { data: res, isLoading: patchLoading }] =
+    usePatchVideoGiftMutation();
   const onSelectTheme = (item: any) => {
-    patchVideoGift({id: searchParams?.videoGiftId, themeId: item.id})
-  }
+    patchVideoGift({ id: searchParams?.videoGiftId, themeId: item.id });
+  };
 
-  if(!patchLoading && res){
-    router.back()
+  if (!patchLoading && res) {
+    router.back();
   }
 
   useEffect(() => {
     getThemes('');
   }, []);
 
-
-
   const changeSelectedCat = (catId) => {
     setSelectedCat(catId);
     // get musics
-    getThemes(catId)
+    getThemes(catId);
   };
 
   const { data: category } = useGetThemeCategoriesQuery('');
 
   return (
-    <LoaderView isLoading={isLoading}>
+    <LoaderView isLoading={isLoading || isFetching || patchLoading}>
       <KeyboardAvoidingWrapper>
         <>
           <StandardContainer>
@@ -108,17 +110,16 @@ const SelectTheme = () => {
                 })}
             </ScrollView>
           </StandardContainer>
-          <StandardContainer style={{flex: 1}}>
+          <StandardContainer style={{ flex: 1 }}>
             <ScrollView>
               {data && Array.isArray(data) && data.length > 0 ? (
                 data.map((item: any) => {
                   return (
-                    <TouchableOpacity key={item.id}>
+                    <TouchableOpacity key={item.id} style={{marginBottom: 10}}>
                       <ListItem
                         style={{
                           borderRadius: 5,
                           backgroundColor: 'lightgray',
-                          marginBottom: 10
                         }}
                         activeBackgroundColor={Colors.grey60}
                         activeOpacity={0.3}
@@ -126,15 +127,29 @@ const SelectTheme = () => {
                         onPress={() => onSelectTheme(item)}
                       >
                         <ListItem.Part left>
-                          <Image source={{uri: item.previewImageUrl}} style={styles.image}/>
+                          <Image
+                            source={{ uri: item.previewImageUrl }}
+                            style={styles.image}
+                          />
                         </ListItem.Part>
-                        <ListItem.Part middle column containerStyle={{paddingRight: 17}}>
+                        <ListItem.Part
+                          middle
+                          column
+                          containerStyle={{ paddingRight: 17 }}
+                        >
                           <ListItem.Part containerStyle={{}}>
-                            <Text style={{flex: 1, marginRight: 10, fontWeight: 'bold'}} numberOfLines={1}>
+                            <Text
+                              style={{
+                                flex: 1,
+                                marginRight: 10,
+                                fontWeight: 'bold'
+                              }}
+                              numberOfLines={1}
+                            >
                               {item.title}
                             </Text>
-                            <Text style={{marginTop: 2}}>
-                              <Chip label={'Select'} />
+                            <Text style={{ marginTop: 2 }}>
+                              <Chip label="Select" />
                             </Text>
                           </ListItem.Part>
                         </ListItem.Part>
@@ -152,11 +167,7 @@ const SelectTheme = () => {
                   }}
                 >
                   {/*musical-notes-outline*/}
-                  <Ionicons
-                    name="albums-outline"
-                    size={32}
-                    color="black"
-                  />
+                  <Ionicons name="albums-outline" size={32} color="black" />
                   <Text>No Theme Found!</Text>
                 </View>
               )}
