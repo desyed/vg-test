@@ -105,7 +105,7 @@ const AddBgMusic = () => {
 
   const router = useRouter();
 
-  const [getMusics, { data, isLoading, isFetching }] =
+  const [getMusics, { data, isLoading, isFetching, isSuccess }] =
     useLazyGetAllBgMusicQuery();
 
   const [selectBgMusic, { data: res, isLoading: selectLoading }] =
@@ -134,8 +134,8 @@ const AddBgMusic = () => {
 
   const changeSelectedCat = (catId) => {
     setSelectedCat(catId);
-    // get musics
-    getMusics({ catId: selectedCat, page: currentPage });
+    // @ts-ignore
+    getMusics({ catId, page: currentPage }, { preferCacheValue: true});
   };
 
   const { data: category } = useGetBgMusicCategoriesQuery('');
@@ -149,7 +149,7 @@ const AddBgMusic = () => {
   }
 
   return (
-    <>
+    <LoaderView isLoading={isFetching}>
       {/*<KeyboardAvoidingWrapper>*/}
             <FlatList
               style={{backgroundColor: 'white'}}
@@ -164,7 +164,7 @@ const AddBgMusic = () => {
               />)}
               keyExtractor={keyExtractor}
               onRefresh={() => onRefresh()}
-              refreshing={isFetching}
+              refreshing={false}
               onEndReachedThreshold={0.2}
               onEndReached={() => fetchMore()}
               ListHeaderComponent={<>
@@ -223,7 +223,7 @@ const AddBgMusic = () => {
               </>}
             />
       {/*</KeyboardAvoidingWrapper>*/}
-    </>
+    </LoaderView>
   );
 };
 
