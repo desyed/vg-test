@@ -49,11 +49,7 @@ const PREVIEW_WIDTH = 120;
 // }
 
 const VideoPreview = ({ item, index, drag, isActive, setSelectedVideo }) => {
-  const video = useRef(null);
   const router = useRouter();
-  const [showVideo, setShowVideo] = useState(true);
-  const [isLoaded, setIsLoaded] = useState(false);
-  const [status, setStatus] = useState({});
 
   return (
     <ScaleDecorator>
