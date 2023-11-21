@@ -133,7 +133,7 @@ const DetailScreen = ({ videoGiftData }) => {
   } = useGetSelectedMediaQuery({
     videoGiftId: videoGiftData?.videoGift?.id
   });
-  console.info('selectedMedia ', selectedMedia);
+
   useEffect(() => {
     setData(selectedMedia);
   }, [selectedMedia]);
@@ -143,7 +143,6 @@ const DetailScreen = ({ videoGiftData }) => {
         <PrimaryButton
           label="Add Media"
           onPress={() => {
-            console.info('videoGiftData ', videoGiftData);
             router.push({
               pathname: '(drawer)/(tabs)/home/recorder',
               params: { videoGiftId: videoGiftData?.videoGift?.id }
