@@ -10,15 +10,15 @@ import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Dimensions, StyleSheet, View } from 'react-native';
 import DraggableFlatList, {
-  ScaleDecorator
+  ScaleDecorator,
 } from 'react-native-draggable-flatlist';
 import { ScrollView } from 'react-native-gesture-handler';
 import {
-  ActionSheet,
+  ActionSheet, Colors,
   Image,
   Text,
   TouchableOpacity
-} from 'react-native-ui-lib';
+} from "react-native-ui-lib";
 import {
   useGetSelectedMediaQuery,
   useMoveSelectedMediaOrderMutation
@@ -33,6 +33,7 @@ import MusicTab from '../../../../components/backgroundMusic/music-tab';
 import hairlineWidth = StyleSheet.hairlineWidth;
 
 import Theme from '../../../../components/theme/theme';
+import ProgressiveImage from "../../../../components/ProgressiveImage";
 
 const Tab = createMaterialTopTabNavigator();
 
@@ -48,41 +49,11 @@ const PREVIEW_WIDTH = 120;
 //   await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.DEFAULT);
 // }
 
-const VideoPreview = ({ item, index, drag, isActive, setSelectedVideo }) => {
+const VideoPreview = ({ item, index, drag, isActive }) => {
   const router = useRouter();
-
   return (
     <ScaleDecorator>
-      <View style={{ height: PREVIEW_WIDTH + 50 }}>
-        <TouchableOpacity
-          // activeOpacity={1}
-          onPress={() => {
-            setSelectedVideo({ videoUri: item?.hlsUrl });
-          }}
-          onLongPress={drag}
-          // disabled={isActive}
-          style={[
-            styles.rowItem,
-            {
-              opacity: isActive ? 0.5 : 1,
-              padding: 5
-              // backgroundColor: item.backgroundColor
-            }
-          ]}
-        >
-          <Image
-            style={{
-              objectFit: 'cover',
-              width: PREVIEW_WIDTH,
-              height: PREVIEW_WIDTH
-            }}
-            source={{
-              uri: `${item?.media?.previewImageUrl}`
-            }}
-          />
-
-          {/* <Text style={styles.text}>{item.id}</Text> */}
-        </TouchableOpacity>
+      <View style={{ height: PREVIEW_WIDTH + 10 }}>
         <TouchableOpacity
           // activeOpacity={1}
           onPress={() => {
@@ -90,7 +61,7 @@ const VideoPreview = ({ item, index, drag, isActive, setSelectedVideo }) => {
               pathname: '(drawer)/(tabs)/home/edit-caption',
               params: {
                 selectedMediaId: item?.id,
-
+                selectedMediaUrl: item?.hlsUrl,
                 videoGiftId: item?.media?.videoGiftId
               }
             });
@@ -106,7 +77,34 @@ const VideoPreview = ({ item, index, drag, isActive, setSelectedVideo }) => {
             }
           ]}
         >
-          <Text style={{ fontSize: 14, textAlign: 'center' }}>
+
+          <ProgressiveImage
+            thumbnailSource={require('../../../../../assets/loading.png')}
+            source={{ uri: `${item?.media?.previewImageUrl}` }}
+            style={{ width: PREVIEW_WIDTH, height: PREVIEW_WIDTH - 50 }}
+            resizeMode="cover"
+          />
+
+
+
+          {/* <Text style={styles.text}>{item.id}</Text> */}
+        </TouchableOpacity>
+        <TouchableOpacity
+          // activeOpacity={1}
+          onPress={() => {
+
+          }}
+          onLongPress={drag}
+          // disabled={isActive}
+          style={[
+            // styles.rowItem,
+            {
+              opacity: isActive ? 0.5 : 1,
+              // backgroundColor: item.backgroundColor
+            }
+          ]}
+        >
+          <Text style={{ fontSize: 14, fontWeight: 'bold', textAlign: 'center' }}>
             {item.title || 'No title'}
           </Text>
           <Text style={{ fontSize: 12, textAlign: 'center' }}>
@@ -121,9 +119,9 @@ const DetailScreen = ({ videoGiftData }) => {
   const router = useRouter();
   const [data, setData] = useState([]);
   const videoPreviewFlatlist = useRef(null);
-  const selectedVideoRef = useRef(null);
-  const [selectedVideo, setSelectedVideo] = useState({});
-  const windowWidth = Dimensions.get('window').width;
+
+
+
   const [triggerMoveSelectedMedia] = useMoveSelectedMediaOrderMutation();
 
   const {
@@ -150,69 +148,45 @@ const DetailScreen = ({ videoGiftData }) => {
           }}
         />
       </StandardContainer>
-      <StandardContainer>
+      <StandardContainer >
         <SectionTitle>{videoGiftData?.videoGift?.title}</SectionTitle>
+        <Text style={{color: Colors.yellow5}}>* Long press item to rearrange and click to edit</Text>
       </StandardContainer>
-      <DraggableFlatList
-        ref={videoPreviewFlatlist}
-        data={data || []}
-        horizontal
-        initialNumToRender={4}
-        autoscrollThreshold={100}
-        onDragEnd={({ data }) => {
-          setData(data);
-          triggerMoveSelectedMedia({
-            videoGiftId: videoGiftData?.videoGift?.id,
-            selectedMedia: data.map((item, index) => {
-              return { id: item.id, order: index };
-            })
-          });
-        }}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item, index, drag, isActive }) => {
-          console.info('item ', item);
-          return (
-            <VideoPreview
-              item={item}
-              index={index}
-              drag={drag}
-              isActive={isActive}
-              setSelectedVideo={setSelectedVideo}
-            />
-          );
-        }}
-        renderPlaceholder={() => (
-          <View style={{ flex: 1, backgroundColor: 'tomato' }} />
-        )}
-        // numColumns={3}
-      />
-      {selectedVideo?.videoUri ? (
-        <Video
-          ref={selectedVideoRef}
-          style={{
-            alignSelf: 'center',
-            width: windowWidth,
-            height: 200
+      <StandardContainer style={{marginTop: 0}}>
+        <DraggableFlatList
+          ref={videoPreviewFlatlist}
+          data={data || []}
+          horizontal
+          initialNumToRender={4}
+          autoscrollThreshold={100}
+          onDragEnd={({ data }) => {
+            setData(data);
+            triggerMoveSelectedMedia({
+              videoGiftId: videoGiftData?.videoGift?.id,
+              selectedMedia: data.map((item, index) => {
+                return { id: item.id, order: index };
+              })
+            });
           }}
-          source={{
-            uri: selectedVideo?.videoUri
+          keyExtractor={(item) => item.id}
+          renderItem={({ item, index, drag, isActive }) => {
+            console.info('item ', item);
+            return (
+              <VideoPreview
+                item={item}
+                index={index}
+                drag={drag}
+                isActive={isActive}
+              />
+            );
           }}
-          onLoad={() => {
-            selectedVideoRef.current?.playAsync();
-          }}
-          // shouldPlay
-          useNativeControls
-          resizeMode={ResizeMode.CONTAIN}
-          onFullscreenUpdate={async (VideoFullscreenUpdateEvent) => {
-            if (VideoFullscreenUpdateEvent.fullscreenUpdate === 1) {
-              // await changeScreenOrientationLandscape();
-            } else {
-              // await changeScreenOrientationPortrait();
-            }
-          }}
-          // onPlaybackStatusUpdate={(status) => setStatus(() => status)}
+          renderPlaceholder={() => (
+            <View style={{ flex: 1, backgroundColor: 'lightgray' }} />
+          )}
+          // numColumns={3}
         />
-      ) : null}
+      </StandardContainer>
+
     </View>
   );
 };
