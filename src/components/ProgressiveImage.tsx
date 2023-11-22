@@ -26,12 +26,12 @@ const ProgressiveImage = ({
 
   const handleThumbnailLoad = () => {
     // @ts-ignore
-    Animated.timing(thumbnailAnimated, { toValue: 1 }).start();
+    Animated.timing(thumbnailAnimated, { toValue: 1, useNativeDriver: true}).start();
   };
 
   const onImageLoad = () => {
     // @ts-ignore
-    Animated.timing(imageAnimated, { toValue: 1 }).start();
+    Animated.timing(imageAnimated, { toValue: 1, useNativeDriver: true}).start();
   };
 
   return (

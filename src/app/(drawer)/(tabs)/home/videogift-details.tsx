@@ -10,15 +10,16 @@ import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Dimensions, StyleSheet, View } from 'react-native';
 import DraggableFlatList, {
-  ScaleDecorator,
+  ScaleDecorator
 } from 'react-native-draggable-flatlist';
 import { ScrollView } from 'react-native-gesture-handler';
 import {
-  ActionSheet, Colors,
+  ActionSheet,
+  Colors,
   Image,
   Text,
   TouchableOpacity
-} from "react-native-ui-lib";
+} from 'react-native-ui-lib';
 import {
   useGetSelectedMediaQuery,
   useMoveSelectedMediaOrderMutation
@@ -33,7 +34,7 @@ import MusicTab from '../../../../components/backgroundMusic/music-tab';
 import hairlineWidth = StyleSheet.hairlineWidth;
 
 import Theme from '../../../../components/theme/theme';
-import ProgressiveImage from "../../../../components/ProgressiveImage";
+import ProgressiveImage from '../../../../components/ProgressiveImage';
 
 const Tab = createMaterialTopTabNavigator();
 
@@ -77,7 +78,6 @@ const VideoPreview = ({ item, index, drag, isActive }) => {
             }
           ]}
         >
-
           <ProgressiveImage
             thumbnailSource={require('../../../../../assets/loading.png')}
             source={{ uri: `${item?.media?.previewImageUrl}` }}
@@ -85,26 +85,24 @@ const VideoPreview = ({ item, index, drag, isActive }) => {
             resizeMode="cover"
           />
 
-
-
           {/* <Text style={styles.text}>{item.id}</Text> */}
         </TouchableOpacity>
         <TouchableOpacity
           // activeOpacity={1}
-          onPress={() => {
-
-          }}
+          onPress={() => {}}
           onLongPress={drag}
           // disabled={isActive}
           style={[
             // styles.rowItem,
             {
-              opacity: isActive ? 0.5 : 1,
+              opacity: isActive ? 0.5 : 1
               // backgroundColor: item.backgroundColor
             }
           ]}
         >
-          <Text style={{ fontSize: 14, fontWeight: 'bold', textAlign: 'center' }}>
+          <Text
+            style={{ fontSize: 14, fontWeight: 'bold', textAlign: 'center' }}
+          >
             {item.title || 'No title'}
           </Text>
           <Text style={{ fontSize: 12, textAlign: 'center' }}>
@@ -120,7 +118,6 @@ const DetailScreen = ({ videoGiftData }) => {
   const [data, setData] = useState([]);
   const videoPreviewFlatlist = useRef(null);
   const windowWidth = Dimensions.get('window').width;
-
 
   const [triggerMoveSelectedMedia] = useMoveSelectedMediaOrderMutation();
 
@@ -142,17 +139,21 @@ const DetailScreen = ({ videoGiftData }) => {
           label="Add Media"
           onPress={() => {
             router.push({
-              pathname: '(drawer)/(tabs)/home/recorder',
+              pathname: '/(drawer)/(tabs)/home/recorder',
               params: { videoGiftId: videoGiftData?.videoGift?.id }
             });
           }}
         />
       </StandardContainer>
-      <StandardContainer >
+      <StandardContainer>
         <SectionTitle>{videoGiftData?.videoGift?.title}</SectionTitle>
-        {data && <Text style={{ color: Colors.yellow5 }}>* Long press item to rearrange or click to edit</Text>}
+        {data && (
+          <Text style={{ color: Colors.yellow5 }}>
+            * Long press item to rearrange or click to edit
+          </Text>
+        )}
       </StandardContainer>
-      <StandardContainer style={{marginTop: 0}}>
+      <StandardContainer style={{ marginTop: 0 }}>
         <DraggableFlatList
           ref={videoPreviewFlatlist}
           data={data || []}
@@ -183,14 +184,21 @@ const DetailScreen = ({ videoGiftData }) => {
           renderPlaceholder={() => (
             <View style={{ flex: 1, backgroundColor: 'lightgray' }} />
           )}
-          ListEmptyComponent={<View>
-            {selectMediaIsLoading ? <Text>Loading...</Text> :<Text style={{ color: Colors.yellow5 }}><Ionicons size={18} name="information-circle-outline" /> No Media
-              added! Please add Media.</Text>}
-            </View>}
+          ListEmptyComponent={
+            <View>
+              {selectMediaIsLoading ? (
+                <Text>Loading...</Text>
+              ) : (
+                <Text style={{ color: Colors.yellow5 }}>
+                  <Ionicons size={18} name="information-circle-outline" /> No
+                  Media added! Please add Media.
+                </Text>
+              )}
+            </View>
+          }
           // numColumns={3}
         />
       </StandardContainer>
-
     </View>
   );
 };

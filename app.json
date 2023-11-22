@@ -16,6 +16,7 @@
     "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true,
+      "requireFullScreen": true,
       "infoPlist": {
         "NSCameraUsageDescription": "VideoGift needs access to your Camera.",
         "NSMicrophoneUsageDescription": "VideoGift needs access to your Microphone."
@@ -56,6 +57,12 @@
         "expo-image-picker",
         {
           "photosPermission": "The app accesses your photos."
+        }
+      ],
+      [
+        "expo-screen-orientation",
+        {
+          "initialOrientation": "DEFAULT"
         }
       ]
     ],

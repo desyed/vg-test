@@ -5,10 +5,11 @@ import { CAMERA_TYPE } from 'constants';
 import { Camera, CameraType } from 'expo-camera';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { isEmpty } from 'lodash';
-import { useRef, useState } from 'react';
-import { Button, Pressable, StyleSheet, View } from 'react-native';
+import { useEffect, useRef, useState } from "react";
+import { Button, Dimensions, Pressable, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { SegmentedControl, Text } from 'react-native-ui-lib';
+import * as ScreenOrientation from 'expo-screen-orientation';
 import uuid from 'react-native-uuid';
 
 export function CameraRecorder() {
@@ -23,8 +24,40 @@ export function CameraRecorder() {
   const [permission, requestPermission] = Camera.useCameraPermissions();
 
   const [recording, setRecording] = useState(false);
-
   const insets = useSafeAreaInsets();
+
+  /* enum Orientation {
+      UNKNOWN = 0,
+        PORTRAIT_UP = 1,
+        PORTRAIT_DOWN = 2,
+        LANDSCAPE_LEFT = 3,
+        LANDSCAPE_RIGHT = 4
+    } */
+
+  const [orientation, setOrientation] = useState(1)
+
+  const detectOrientation= async () => {
+    let orientation = await ScreenOrientation.getOrientationAsync();
+    const screen = Dimensions.get('screen');
+    if (orientation === 0) {
+      orientation = screen.width > screen.height ? ScreenOrientation.Orientation.LANDSCAPE : ScreenOrientation.Orientation.PORTRAIT;
+    }
+    setOrientation(orientation);
+  };
+
+  useEffect(async () => {
+    await detectOrientation()
+    const subscription = ScreenOrientation.addOrientationChangeListener(
+      handleOrientationChange
+    );
+    return () => {
+      ScreenOrientation.removeOrientationChangeListeners(subscription);
+    };
+  }, [])
+
+  const handleOrientationChange = (o) => {
+    alert(o.orientationInfo.orientation)
+  }
 
   const beginVideo = async () => {
     if (recording) {
