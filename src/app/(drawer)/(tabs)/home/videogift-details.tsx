@@ -7,6 +7,7 @@ import { SectionTitle } from 'components/ui/Title';
 import { ResizeMode, Video } from 'expo-av';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 // import * as ScreenOrientation from 'expo-screen-orientation';
+import * as _ from 'lodash';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Dimensions, StyleSheet, View } from 'react-native';
 import DraggableFlatList, {
@@ -16,25 +17,26 @@ import { ScrollView } from 'react-native-gesture-handler';
 import {
   ActionSheet,
   Colors,
-  Image,
   Text,
-  TouchableOpacity
+  TouchableOpacity,
+  Button
 } from 'react-native-ui-lib';
 import {
+  useCreateMediaMutation,
   useGetSelectedMediaQuery,
-  useMoveSelectedMediaOrderMutation
+  useMoveSelectedMediaOrderMutation,
+  useSelectMediaMutation
 } from 'services/mediaApi';
 import {
   useGeneratePreviewMutation,
   useGetVideoGiftByIdQuery
 } from 'services/videoGiftApi';
 
-import MusicTab from '../../../../components/backgroundMusic/music-tab';
-
-import hairlineWidth = StyleSheet.hairlineWidth;
-
-import Theme from '../../../../components/theme/theme';
 import ProgressiveImage from '../../../../components/ProgressiveImage';
+import MusicTab from '../../../../components/backgroundMusic/music-tab';
+import Theme from '../../../../components/theme/theme';
+import { useGetSignedPutUrlMutation } from '../../../../services/awsApi';
+import { createMediaUploadTask, pickImage } from '../../../../utils/uploadUtil';
 
 const Tab = createMaterialTopTabNavigator();
 
@@ -116,10 +118,56 @@ const VideoPreview = ({ item, index, drag, isActive }) => {
 const DetailScreen = ({ videoGiftData }) => {
   const router = useRouter();
   const [data, setData] = useState([]);
+  const [imageLoading, setImageLoading] = useState(false);
   const videoPreviewFlatlist = useRef(null);
   const windowWidth = Dimensions.get('window').width;
+  const [getSignedPutUrl] = useGetSignedPutUrlMutation();
+  const [createMedia] = useCreateMediaMutation();
+  const [selectMedia] = useSelectMediaMutation();
 
   const [triggerMoveSelectedMedia] = useMoveSelectedMediaOrderMutation();
+
+  const uploadImage = async () => {
+    console.log('uploadImage');
+    setImageLoading(true);
+    const resizedImage = await pickImage();
+    const task = await createMediaUploadTask({
+      uri: resizedImage?.uri,
+      getSignedPutUrl,
+      acl: 'public-read',
+      onProgress: (e) => {
+        // setProgress({
+        //     ...progress,
+        //
+        //     [currentMedia?.id]: {
+        //         ...progress[currentMedia?.id],
+        //         video: e.totalBytesSent / e.totalBytesExpectedToSend
+        //     }
+        // });
+        // console.info('PROGRESS', progress);
+      }
+    });
+
+    if (task) {
+      console.log('task', task);
+
+      const mediaResponse = await createMedia({
+        // previewImageUrl: taskPicture?.url,
+        originalKey: task?.key,
+        type: 'VIDEO',
+        videoGiftId: videoGiftData?.videoGift?.id
+      });
+      if (mediaResponse?.data) {
+        selectMedia({
+          videoGiftId: videoGiftData?.videoGift?.id,
+          mediaId: mediaResponse?.data?.id,
+          order: 'NEXT'
+        });
+      }
+    }
+
+    setImageLoading(false);
+  };
 
   const {
     data: selectedMedia,
@@ -132,11 +180,19 @@ const DetailScreen = ({ videoGiftData }) => {
   useEffect(() => {
     setData(selectedMedia);
   }, [selectedMedia]);
+
   return (
     <View style={{ flex: 1 }}>
-      <StandardContainer style={{}}>
+      <StandardContainer
+        style={{
+          display: 'flex',
+          gap: 5,
+          flexDirection: 'row',
+          justifyContent: 'center'
+        }}
+      >
         <PrimaryButton
-          label="Add Media"
+          label="Create Media"
           onPress={() => {
             router.push({
               pathname: '/(drawer)/(tabs)/home/recorder',
@@ -144,10 +200,15 @@ const DetailScreen = ({ videoGiftData }) => {
             });
           }}
         />
+        <Button
+          label="Upload Media"
+          backgroundColor={Colors.green20}
+          onPress={uploadImage}
+        />
       </StandardContainer>
       <StandardContainer>
         <SectionTitle>{videoGiftData?.videoGift?.title}</SectionTitle>
-        {data && (
+        {data && !_.isEmpty(data) && (
           <Text style={{ color: Colors.yellow5 }}>
             * Long press item to rearrange or click to edit
           </Text>
@@ -170,6 +231,7 @@ const DetailScreen = ({ videoGiftData }) => {
             });
           }}
           keyExtractor={(item) => item.id}
+          /* @ts-ignore */
           renderItem={({ item, index, drag, isActive }) => {
             console.info('item ', item);
             return (

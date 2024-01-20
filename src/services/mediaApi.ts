@@ -17,6 +17,23 @@ const awsApi = rootApi.injectEndpoints({
       })
     }),
 
+    createBatchMedia: builder.mutation({
+      invalidatesTags: ['Media', 'SelectedMedia'],
+      query: ({ videoGiftId, participantId, medias }) => ({
+        url: '/media/batch',
+        method: 'POST',
+        body: {
+          // previewImageUrl: payload.previewImageUrl,
+          // originalKey: payload.originalKey,
+          // videoType: payload.videoType,
+          // type: payload.type,
+          videoGiftId,
+          participantId,
+          medias
+        }
+      })
+    }),
+
     patchMedia: builder.mutation({
       query: (payload) => ({
         url: `/media/${payload.mediaId}`,

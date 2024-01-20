@@ -14,7 +14,7 @@ const Item = ({ item, index, generatePreview }) => {
       <View flex margin-10 bg-grey70 padding-10>
         <View>
           <Text text70 style={{ flex: 1, marginRight: 10 }} numberOfLines={1}>
-            {item.videoGiftCustomer?.name}
+            {item?.videoGiftCustomer?.name}
           </Text>
         </View>
         <View>

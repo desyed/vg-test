@@ -184,7 +184,7 @@ export function CameraRecorder() {
                       style={{
                         width: 40,
                         backgroundColor: 'white',
-                        borderRadius: '50%',
+                        // borderRadius: '50%',
                         display: 'flex',
                         justifyContent: 'center',
                         alignItems: 'center'

@@ -7,6 +7,6 @@ const styles = StyleSheet.create({
   }
 });
 
-export const StandardContainer = ({ children, style = {} }) => (
+export const StandardContainer = ({ children, style = {} }: any) => (
   <View style={[styles.container, style]}>{children}</View>
 );

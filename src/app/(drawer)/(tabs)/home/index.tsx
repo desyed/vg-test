@@ -35,7 +35,7 @@ function getInitials(name) {
 
 const Header = () => {
   const navigation = useNavigation();
-  const { data: dataMe } = useGetMeQuery();
+  const { data: dataMe } = useGetMeQuery({});
   return (
     <>
       <View style={styles.topContainer}>
@@ -44,7 +44,7 @@ const Header = () => {
             <Group>
               <TouchableOpacity
                 onPress={() => {
-                  navigation.toggleDrawer();
+                  navigation?.toggleDrawer();
                 }}
               >
                 <Avatar
