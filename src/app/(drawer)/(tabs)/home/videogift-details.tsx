@@ -134,7 +134,7 @@ const DetailScreen = ({ videoGiftData }) => {
     const task = await createMediaUploadTask({
       uri: resizedImage?.uri,
       getSignedPutUrl,
-      acl: 'public-read',
+      acl: 'private',
       onProgress: (e) => {
         // setProgress({
         //     ...progress,
@@ -149,6 +149,7 @@ const DetailScreen = ({ videoGiftData }) => {
     });
 
     if (task) {
+        await task.task.uploadAsync();
       console.log('task', task, data);
       const mediaType = task?.mimeType?.includes('image') ? 'IMAGE' : 'VIDEO';
 
