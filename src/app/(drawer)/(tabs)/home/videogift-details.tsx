@@ -22,6 +22,7 @@ import {
   Button
 } from 'react-native-ui-lib';
 import {
+  useCreateBatchMediaMutation,
   useCreateMediaMutation,
   useGetSelectedMediaQuery,
   useMoveSelectedMediaOrderMutation,
@@ -122,8 +123,7 @@ const DetailScreen = ({ videoGiftData }) => {
   const videoPreviewFlatlist = useRef(null);
   const windowWidth = Dimensions.get('window').width;
   const [getSignedPutUrl] = useGetSignedPutUrlMutation();
-  const [createMedia] = useCreateMediaMutation();
-  const [selectMedia] = useSelectMediaMutation();
+  const [createMedia] = useCreateBatchMediaMutation();
 
   const [triggerMoveSelectedMedia] = useMoveSelectedMediaOrderMutation();
 
@@ -149,21 +149,28 @@ const DetailScreen = ({ videoGiftData }) => {
     });
 
     if (task) {
-      console.log('task', task);
+      console.log('task', task, data);
+      const mediaType = task?.mimeType?.includes('image') ? 'IMAGE' : 'VIDEO';
 
       const mediaResponse = await createMedia({
         // previewImageUrl: taskPicture?.url,
-        originalKey: task?.key,
-        type: 'VIDEO',
-        videoGiftId: videoGiftData?.videoGift?.id
+        videoGiftId: videoGiftData?.videoGift?.id,
+        // participantId: data?.participantId,
+        medias: [
+          {
+            type: mediaType,
+            originalKey: task?.key,
+            // previewImageUrl,
+            // participantId: data?.participantId,
+            videoType: 'SUPPLEMENTARY',
+            // title: mediaFile?.title,
+            // subTitle: mediaFile?.subTitle
+          }
+        ]
+        // originalKey: task?.key,
+        // type: 'VIDEO',
+        // videoGiftId: videoGiftData?.videoGift?.id
       });
-      if (mediaResponse?.data) {
-        selectMedia({
-          videoGiftId: videoGiftData?.videoGift?.id,
-          mediaId: mediaResponse?.data?.id,
-          order: 'NEXT'
-        });
-      }
     }
 
     setImageLoading(false);

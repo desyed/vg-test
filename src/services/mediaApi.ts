@@ -116,6 +116,7 @@ const awsApi = rootApi.injectEndpoints({
 
 export const {
   useCreateMediaMutation,
+  useCreateBatchMediaMutation,
   useSelectMediaMutation,
   useGetSelectedMediaQuery,
   useGetMediaByIdQuery,
