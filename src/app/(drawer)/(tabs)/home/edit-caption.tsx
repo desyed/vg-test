@@ -14,6 +14,7 @@ import {
   usePatchSelectedMediaMutation
 } from 'services/mediaApi';
 import { ResizeMode, Video } from "expo-av";
+import { useSelector } from "react-redux";
 
 export default function EditCaptionScreen() {
   const searchParams = useLocalSearchParams();
@@ -21,6 +22,8 @@ export default function EditCaptionScreen() {
   const windowWidth = Dimensions.get('window').width;
 
   const router = useRouter();
+  const user = useSelector(state => state?.auth?.user)
+
   const { data: selectedMedia, isLoading } = useGetSelectedMediaByIdQuery({
     selectedMediaId: searchParams.selectedMediaId
   });
@@ -28,7 +31,8 @@ export default function EditCaptionScreen() {
     usePatchSelectedMediaMutation();
   const { isLoading: selectMediaIsLoading, refetch: refetchSelectedMedia } =
     useGetSelectedMediaQuery({
-      videoGiftId: searchParams?.videoGiftId
+      videoGiftId: searchParams?.videoGiftId,
+      organizationId: user?.selectedOrganizationId
     });
 
   const {

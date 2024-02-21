@@ -21,6 +21,7 @@ import {
   TouchableOpacity,
   Button
 } from 'react-native-ui-lib';
+import { useSelector } from 'react-redux';
 import {
   useCreateBatchMediaMutation,
   useCreateMediaMutation,
@@ -118,6 +119,9 @@ const VideoPreview = ({ item, index, drag, isActive }) => {
 };
 const DetailScreen = ({ videoGiftData }) => {
   const router = useRouter();
+  const organizationId = useSelector(
+    (state) => state?.auth?.user?.selectedOrganizationId
+  );
   const [data, setData] = useState([]);
   const [imageLoading, setImageLoading] = useState(false);
   const videoPreviewFlatlist = useRef(null);
@@ -149,7 +153,7 @@ const DetailScreen = ({ videoGiftData }) => {
     });
 
     if (task) {
-        await task.task.uploadAsync();
+      await task.task.uploadAsync();
       console.log('task', task, data);
       const mediaType = task?.mimeType?.includes('image') ? 'IMAGE' : 'VIDEO';
 
@@ -163,7 +167,7 @@ const DetailScreen = ({ videoGiftData }) => {
             originalKey: task?.key,
             // previewImageUrl,
             // participantId: data?.participantId,
-            videoType: 'SUPPLEMENTARY',
+            videoType: 'SUPPLEMENTARY'
             // title: mediaFile?.title,
             // subTitle: mediaFile?.subTitle
           }
@@ -182,7 +186,8 @@ const DetailScreen = ({ videoGiftData }) => {
     isLoading: selectMediaIsLoading,
     refetch: refetchSelectedMedia
   } = useGetSelectedMediaQuery({
-    videoGiftId: videoGiftData?.videoGift?.id
+    videoGiftId: videoGiftData?.videoGift?.id,
+    organizationId
   });
 
   useEffect(() => {
@@ -278,14 +283,18 @@ export default function VideoGiftDetailScreen() {
   const searchParams = useLocalSearchParams();
   const windowWidth = Dimensions.get('window').width;
   const windowHeight = Dimensions.get('window').height;
+  const organizationId = useSelector(
+    (state) => state?.auth?.user?.selectedOrganizationId
+  );
 
   const {
     data: videoGiftData,
     isLoading,
     refetch: refetchVideoGift
-  } = useGetVideoGiftByIdQuery(searchParams?.videoGiftId, {
-    refetchOnMountOrArgChange: true
-  });
+  } = useGetVideoGiftByIdQuery(
+    { videoGiftId: searchParams?.videoGiftId, organizationId },
+    { refetchOnMountOrArgChange: true }
+  );
 
   const [generatePreview] = useGeneratePreviewMutation();
 
@@ -411,7 +420,7 @@ export default function VideoGiftDetailScreen() {
           {
             label: 'Generate Preview',
             onPress: async () => {
-              await generatePreview({ videoGiftId: searchParams?.videoGiftId });
+              await generatePreview({ videoGiftId: searchParams?.videoGiftId, organizationId });
               refetchVideoGift();
             }
           },

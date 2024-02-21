@@ -3,17 +3,20 @@ import { rootApi } from './rootApi';
 interface Theme {
   id?: string;
   title: string;
+  organizationId?: string;
   themeCategoryId: string;
   previewImageUrl: string;
   isCompanyTheme: boolean;
 }
 interface ImageBody {
   id: string;
+  organizationId?: string;
   imageUrl: string;
   imageThumbUrl: string;
 }
 interface UpdateImage {
   id: string;
+  organizationId?: string;
   themeId: string;
   order: string;
 }
@@ -21,45 +24,45 @@ interface UpdateImage {
 const videoGiftApi = rootApi.injectEndpoints({
   endpoints: (builder) => ({
     getThemeCategories: builder.query({
-      query: () => ({
-        url: `/themes/categories?getAll=true`,
+      query: ({ organizationId }) => ({
+        url: `/organization/${organizationId}/themes/categories?getAll=true`,
         method: 'GET'
       })
     }),
     createTheme: builder.mutation({
       invalidatesTags: ['theme'],
-      query: (body: Theme) => ({
-        url: `/themes/create`,
+      query: ({ organizationId, ...body }: Theme) => ({
+        url: `/organization/${organizationId}/themes/create`,
         method: 'POST',
         body
       })
     }),
     updateTheme: builder.mutation({
       invalidatesTags: ['theme'],
-      query: ({ id, ...body }: Theme) => ({
-        url: `/themes/${id}`,
+      query: ({ id, organizationId, ...body }: Theme) => ({
+        url: `/organization/${organizationId}/themes/${id}`,
         method: 'PUT',
         body
       })
     }),
     deleteTheme: builder.mutation({
       invalidatesTags: ['theme'],
-      query: (id: string) => ({
-        url: `/themes/${id}`,
+      query: ({ id, organizationId }) => ({
+        url: `/organization/${organizationId}/themes/${id}`,
         method: 'DELETE'
       })
     }),
     getAllThemes: builder.query({
       providesTags: ['theme'],
-      query: (catId?: string) => ({
-        url: `/themes?themeCategoryId=${catId || ''}`,
+      query: ({ catId, organizationId}: any) => ({
+        url: `/organization/${organizationId}/themes?themeCategoryId=${catId || ''}`,
         method: 'GET'
       })
     }),
     createThemeImage: builder.mutation({
       invalidatesTags: ['theme'],
       query: (payload: ImageBody) => ({
-        url: `themes/${payload.id}/images/create`,
+        url: `/organization/${payload?.organizationId}/themes/${payload.id}/images/create`,
         method: 'POST',
         body: payload
       })
@@ -67,7 +70,7 @@ const videoGiftApi = rootApi.injectEndpoints({
     updateThemeImage: builder.mutation({
       invalidatesTags: ['theme'],
       query: (payload: UpdateImage) => ({
-        url: `/themes/${payload.themeId}/images/${payload.id}`,
+        url: `/organization/${payload?.organizationId}/themes/${payload.themeId}/images/${payload.id}`,
         method: 'POST',
         body: payload
       })

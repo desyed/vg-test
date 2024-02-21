@@ -52,8 +52,8 @@ const awsApi = rootApi.injectEndpoints({
               'SelectedMedia'
             ]
           : ['SelectedMedia'],
-      query: (payload) => ({
-        url: '/media/selected',
+      query: ({ organizationId, payload }) => ({
+        url: `/organization/${organizationId}/media/selected`,
         method: 'GET',
         params: {
           videoGiftId: payload.videoGiftId

@@ -21,6 +21,7 @@ import {
 } from 'react-native-ui-lib';
 import { useGetOrdersQuery } from 'services/ordersApi';
 import { useGetMeQuery } from 'services/userApi';
+import { useSelector } from "react-redux";
 function getInitials(name) {
   // Check if name is null or not a string, return empty string if true
   if (typeof name !== 'string' || name === null) {
@@ -138,19 +139,20 @@ function formatDate(inputDate) {
 }
 
 export default function Index() {
+  const organizationId = useSelector(
+    (state) => state?.auth?.user?.selectedOrganizationId
+  );
+
+
   const {
     data: orders,
     isLoading,
     isFetching,
     refetch
-  } = useGetOrdersQuery({});
+  } = useGetOrdersQuery({ organizationId });
 
   // if (isLoading) return <LoaderScreen message="Loading" overlay />;
   const groupedByOrderStatus = groupByOrderStatus(orders || []);
-
-  if(orders){
-    console.info('ordersz', JSON.stringify(groupedByOrderStatus?.data));
-  }
 
   return (
     <>

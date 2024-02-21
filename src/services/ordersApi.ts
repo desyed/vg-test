@@ -4,8 +4,8 @@ const ordersApi = rootApi.injectEndpoints({
   endpoints: (builder) => ({
     getOrders: builder.query({
       providesTags: ['Orders'],
-      query: (params) => ({
-        url: '/orders',
+      query: ({ organizationId, ...params }) => ({
+        url: `/organization/${organizationId}/orders`,
         method: 'GET',
         params
       })
@@ -13,7 +13,7 @@ const ordersApi = rootApi.injectEndpoints({
     createVideoGiftOrder: builder.mutation({
       invalidatesTags: ['Orders'],
       query: (payload) => ({
-        url: `/videogift/${payload.parentVideoGiftId}/order`,
+        url: `/organization/${payload?.organizationId}/videogift/${payload.parentVideoGiftId}/order`,
         method: 'POST',
         body: payload
       })

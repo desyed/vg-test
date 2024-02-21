@@ -7,7 +7,7 @@ import { Button, LoaderScreen, Text, View } from 'react-native-ui-lib';
 import { useSelector } from 'react-redux';
 import { useGetOrdersQuery } from 'services/ordersApi';
 import { useGeneratePreviewMutation } from 'services/videoGiftApi';
-const Item = ({ item, index, generatePreview }) => {
+const Item = ({ item, index, generatePreview, organizationId }) => {
   const router = useRouter();
   return (
     <>
@@ -73,7 +73,7 @@ const Item = ({ item, index, generatePreview }) => {
                   label="Add Media"
                 />
                 <Button
-                  onPress={() => generatePreview({ videoGiftId: item?.id })}
+                  onPress={() => generatePreview({ videoGiftId: item?.id, organizationId })}
                   label="Refresh Preview"
                 />
               </View>
@@ -139,7 +139,7 @@ export default function Index() {
           data={orders}
           extraData={updateData}
           renderItem={(data) => (
-            <Item generatePreview={generatePreview} {...data} />
+            <Item organizationId={user?.selectedOrganizationId } generatePreview={generatePreview} {...data} />
           )}
           keyExtractor={keyExtractor}
           onRefresh={() => onRefresh()}
