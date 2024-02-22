@@ -16,6 +16,7 @@ import {
 } from '../../../../services/backgroundMusicApi';
 
 import hairlineWidth = StyleSheet.hairlineWidth;
+import { useSelector } from "react-redux";
 
 const Item = ({
   data: { item },
@@ -66,6 +67,9 @@ const Item = ({
   );
 };
 const AddBgMusic = () => {
+  const organizationId = useSelector(
+    (state) => state?.auth?.user?.selectedOrganizationId
+  );
   const [sound, setSound] = useState<Audio.Sound>();
   const [selectedCat, setSelectedCat] = useState('');
   const [playing, setPlaying] = useState<number | string | undefined | null>();
@@ -114,7 +118,8 @@ const AddBgMusic = () => {
   const onSelectMusic = (id) => {
     selectBgMusic({
       videoGiftId: String(searchParams?.videoGiftId),
-      backgroundMusicId: id
+      backgroundMusicId: id,
+      organizationId
     });
   };
 

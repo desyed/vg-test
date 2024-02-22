@@ -4,6 +4,7 @@ import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { TouchableOpacity } from 'react-native-ui-lib';
+import { useSelector } from "react-redux";
 
 import {
   useRemoveSelectedBackgroundMusicMutation,
@@ -17,6 +18,7 @@ import { SectionTitle } from '../ui/Title';
 const hairlineWidth = StyleSheet.hairlineWidth;
 
 const MusicTab = ({ videoGiftId }: { videoGiftId: string }) => {
+  const organizationId = useSelector(state => state?.auth?.user?.selectedOrganizationId)
   const [sound, setSound] = useState<Audio.Sound>();
   const [playing, setPlaying] = useState<number | string | undefined | null>();
 
@@ -51,13 +53,15 @@ const MusicTab = ({ videoGiftId }: { videoGiftId: string }) => {
   const router = useRouter();
 
   const { data, isLoading, isFetching, error } =
-    useSelectedBackgroundMusicQuery(videoGiftId);
+    useSelectedBackgroundMusicQuery({ videoGiftId, organizationId });
 
   const [removeMusic, { data: deleteRes, isLoading: deleteLoading }] =
     useRemoveSelectedBackgroundMusicMutation();
 
+  console.log('musics', data);
+
   const onDeleteItem = (id) => {
-    removeMusic({ videoGiftId, bgMusicId: id });
+    removeMusic({ videoGiftId, bgMusicId: id, organizationId });
   };
 
   return (

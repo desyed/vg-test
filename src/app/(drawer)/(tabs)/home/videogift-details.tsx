@@ -122,7 +122,7 @@ const DetailScreen = ({ videoGiftData }) => {
   const organizationId = useSelector(
     (state) => state?.auth?.user?.selectedOrganizationId
   );
-  const [data, setData] = useState([]);
+  // const [data, setData] = useState([]);
   const [imageLoading, setImageLoading] = useState(false);
   const videoPreviewFlatlist = useRef(null);
   const windowWidth = Dimensions.get('window').width;
@@ -161,6 +161,7 @@ const DetailScreen = ({ videoGiftData }) => {
         // previewImageUrl: taskPicture?.url,
         videoGiftId: videoGiftData?.videoGift?.id,
         // participantId: data?.participantId,
+        organizationId,
         medias: [
           {
             type: mediaType,
@@ -182,17 +183,21 @@ const DetailScreen = ({ videoGiftData }) => {
   };
 
   const {
-    data: selectedMedia,
+    data,
     isLoading: selectMediaIsLoading,
     refetch: refetchSelectedMedia
   } = useGetSelectedMediaQuery({
     videoGiftId: videoGiftData?.videoGift?.id,
     organizationId
-  });
+  }, { refetchOnMountOrArgChange: true });
 
-  useEffect(() => {
-    setData(selectedMedia);
-  }, [selectedMedia]);
+  // useEffect(() => {
+    console.log('selectedMedia', data, {
+      videoGiftId: videoGiftData?.videoGift?.id,
+      organizationId
+    });
+  //   setData(selectedMedia);
+  // }, [selectedMedia]);
 
   return (
     <View style={{ flex: 1 }}>
@@ -238,6 +243,7 @@ const DetailScreen = ({ videoGiftData }) => {
             setData(data);
             triggerMoveSelectedMedia({
               videoGiftId: videoGiftData?.videoGift?.id,
+              organizationId,
               selectedMedia: data.map((item, index) => {
                 return { id: item.id, order: index };
               })
@@ -265,8 +271,8 @@ const DetailScreen = ({ videoGiftData }) => {
                 <Text>Loading...</Text>
               ) : (
                 <Text style={{ color: Colors.yellow5 }}>
-                  <Ionicons size={18} name="information-circle-outline" /> No
-                  Media added! Please add Media.
+                  <Ionicons size={18} name="information-circle-outline" />
+                  No Media added! Please add Media.
                 </Text>
               )}
             </View>
@@ -426,7 +432,7 @@ export default function VideoGiftDetailScreen() {
           },
           {
             label: 'Mark Complete',
-            onPress: () => this.pickOption('option 2')
+            onPress: () => console.log('mark complete clicked')
           },
           {
             label: 'Cancel',

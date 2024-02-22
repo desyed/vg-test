@@ -17,22 +17,25 @@ import { ResizeMode, Video } from "expo-av";
 import { useSelector } from "react-redux";
 
 export default function EditCaptionScreen() {
+  const organizationId = useSelector(
+    (state) => state?.auth?.user?.selectedOrganizationId
+  );
   const searchParams = useLocalSearchParams();
   const selectedVideoRef = useRef(null);
   const windowWidth = Dimensions.get('window').width;
 
   const router = useRouter();
-  const user = useSelector(state => state?.auth?.user)
 
   const { data: selectedMedia, isLoading } = useGetSelectedMediaByIdQuery({
-    selectedMediaId: searchParams.selectedMediaId
+    selectedMediaId: searchParams.selectedMediaId,
+    organizationId
   });
   const [patchSelectedMedia, { isLoading: isSaving }] =
     usePatchSelectedMediaMutation();
   const { isLoading: selectMediaIsLoading, refetch: refetchSelectedMedia } =
     useGetSelectedMediaQuery({
       videoGiftId: searchParams?.videoGiftId,
-      organizationId: user?.selectedOrganizationId
+      organizationId
     });
 
   const {
@@ -52,7 +55,8 @@ export default function EditCaptionScreen() {
     try {
       const result = await patchSelectedMedia({
         ...data,
-        selectedMediaId: searchParams.selectedMediaId
+        selectedMediaId: searchParams.selectedMediaId,
+        organizationId
       });
 
       if (result?.data) {

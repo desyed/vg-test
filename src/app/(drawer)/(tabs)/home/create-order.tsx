@@ -16,8 +16,13 @@ import {
   useSearchOrganizationUsersQuery
 } from 'services/organizationApi';
 import { Colors, TouchableOpacity } from "react-native-ui-lib";
+import { useSelector } from "react-redux";
 
 export default function CreateCustomerScreen() {
+  const organizationId = useSelector(
+    (state) => state?.auth?.user?.selectedOrganizationId
+  );
+
   const searchParams = useLocalSearchParams();
 
   const router = useRouter();
@@ -26,11 +31,11 @@ export default function CreateCustomerScreen() {
     useCreateVideoGiftOrderMutation();
 
   const { data: experiences, isLoading: isLoadingExperiences } =
-    useGetVideoGiftExperiencesQuery({
+    useGetVideoGiftExperiencesQuery({ organizationId },{
       refetchOnMountOrArgChange: true
     });
 
-  const { data: users, isLoading } = useSearchOrganizationUsersQuery({
+  const { data: users, isLoading } = useSearchOrganizationUsersQuery({organizationId}, {
     refetchOnMountOrArgChange: true
   });
   const { data: occasions, isLoading: isLoadingOccasion } =
@@ -50,7 +55,7 @@ export default function CreateCustomerScreen() {
 
   const onSubmit = async (data) => {
     try {
-      const result = await createOrder(data);
+      const result = await createOrder({ ...data, organizationId });
       if (result?.data) {
         router.replace({
           pathname: '/(drawer)/home/videogift-details',

@@ -3,8 +3,8 @@ import { rootApi } from './rootApi';
 const customerApi = rootApi.injectEndpoints({
   endpoints: (builder) => ({
     getCustomers: builder.query({
-      query: (payload) => ({
-        url: '/customers',
+      query: ({ organizationId, ...payload }) => ({
+        url: `/organization/${organizationId}/customers`,
         method: 'GET',
         body: payload
       }),

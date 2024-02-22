@@ -11,11 +11,13 @@ import {
   useSelectMediaMutation
 } from "services/mediaApi";
 import { createMediaUploadTask } from 'utils/uploadUtil';
+import { useSelector } from "react-redux";
 
 export const MediaPreview = ({ media, setMedia, videoGiftId }) => {
+  const organizationId = useSelector(state => state.auth?.user?.selectedOrganizationId)
   const [getSignedPutUrl] = useGetSignedPutUrlMutation();
   const [createMedia] = useCreateBatchMediaMutation();
-  const [selectMedia] = useSelectMediaMutation();
+  // const [selectMedia] = useSelectMediaMutation();
   const video = useRef(null);
 
   const [progress, setProgress] = useState({});
@@ -28,6 +30,7 @@ export const MediaPreview = ({ media, setMedia, videoGiftId }) => {
     const taskVideo = await createMediaUploadTask({
       uri: currentMedia?.data?.uri,
       getSignedPutUrl,
+      organizationId,
       acl: 'private',
       onProgress: (e) => {
         setProgress({
@@ -56,7 +59,7 @@ export const MediaPreview = ({ media, setMedia, videoGiftId }) => {
 
       const mediaResponse = await createMedia({
         // previewImageUrl: taskPicture?.url,
-
+        organizationId,
         videoGiftId,
         // participantId: data?.participantId,
         medias: [
