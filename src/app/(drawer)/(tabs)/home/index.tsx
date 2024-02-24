@@ -5,9 +5,10 @@ import { Group } from 'components/ui/Group';
 import { PrimaryButton } from 'components/ui/PrimaryButton';
 import { StandardContainer } from 'components/ui/StandardContainer';
 import { StatCard } from 'components/ui/StatCard';
-import { SectionTitle } from 'components/ui/Title';
+import dayjs from 'dayjs'
 import { router, useNavigation } from 'expo-router';
 import { Drawer } from 'expo-router/drawer';
+import { useState } from 'react';
 import { ScrollView, SectionList, StyleSheet } from 'react-native';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -17,12 +18,77 @@ import {
   Image,
   Spacings,
   View,
-  Text, GridList
+  Text,
+  GridList,
+  ActionSheet, Picker, Colors
 } from "react-native-ui-lib";
+import { useSelector } from 'react-redux';
 import { useGetOrdersQuery } from 'services/ordersApi';
 import { useGetMeQuery } from 'services/userApi';
-import { useSelector } from "react-redux";
-import { useGetOrganizationStatsQuery } from "../../../../services/organizationApi";
+
+import { useGetOrganizationStatsQuery } from '../../../../services/organizationApi';
+import _ from "lodash";
+
+export const DATE_PRESETS = {
+  ALL: 'ALL',
+  TODAY: 'TODAY',
+  YESTERDAY: 'YESTERDAY',
+  CURRENT_WEEK: 'CURRENT WEEK',
+  LAST_WEEK: 'LAST WEEK',
+  CURRENT_MONTH: 'CURRENT MONTH',
+  LAST_MONTH: 'LAST MONTH',
+  YTD: 'YTD'
+};
+export const convertDatePresetToDates = (value) => {
+
+  switch (value) {
+    case 'ALL':
+      return {
+        startDate: null,
+        endDate: null,
+      }
+    case 'TODAY':
+      return {
+        startDate: dayjs().startOf('day').toDate().toISOString(),
+        endDate: dayjs().endOf('day').toDate().toISOString(),
+      }
+    case 'YESTERDAY':
+      return {
+        startDate: dayjs().subtract(1, 'day').startOf('day').toDate().toISOString(),
+        endDate: dayjs().subtract(1, 'day').endOf('day').toDate().toISOString(),
+      }
+    case 'CURRENT_WEEK':
+      return {
+        startDate: dayjs().startOf('week').toDate().toISOString(),
+        endDate: dayjs().endOf('week').toDate().toISOString(),
+      }
+    case 'LAST_WEEK':
+      return {
+        startDate: dayjs().subtract(1, 'week').startOf('week').toDate().toISOString(),
+        endDate: dayjs().subtract(1, 'week').endOf('week').toDate().toISOString(),
+      }
+    case 'CURRENT_MONTH':
+      return {
+        startDate: dayjs().startOf('month').toDate().toISOString(),
+        endDate: dayjs().endOf('month').toDate().toISOString(),
+      }
+    case 'LAST_MONTH':
+      return {
+        startDate: dayjs().subtract(1, 'month').startOf('month').toDate().toISOString(),
+        endDate: dayjs().subtract(1, 'month').endOf('month').toDate().toISOString(),
+      }
+    case 'YTD':
+      return {
+        startDate: dayjs().startOf('year').toDate().toISOString(),
+        endDate: dayjs().endOf('year').toDate().toISOString(),
+      }
+    default:
+      return {
+        startDate: undefined,
+        endDate:  undefined,
+      }
+  }
+}
 function getInitials(name) {
   // Check if name is null or not a string, return empty string if true
   if (typeof name !== 'string' || name === null) {
@@ -35,12 +101,17 @@ function getInitials(name) {
   return initials;
 }
 
-const Header = () => {
+const Header = ({onFilter}) => {
   const navigation = useNavigation();
   const organizationId = useSelector(
     (state) => state?.auth?.user?.selectedOrganizationId
   );
-  const { data } = useGetOrganizationStatsQuery({organizationId}, {refetchOnMountOrArgChange: true});
+  const { data } = useGetOrganizationStatsQuery(
+    { organizationId },
+    { refetchOnMountOrArgChange: true }
+  );
+  const [showActionSheet, setShowActionSheet] = useState(false);
+  const [pickedOption, setPickedOption] = useState(DATE_PRESETS.ALL);
   const { data: dataMe } = useGetMeQuery({});
   return (
     <>
@@ -92,6 +163,26 @@ const Header = () => {
           label="Create Order"
         />
       </StandardContainer>
+      <StandardContainer>
+        <View>
+          <Picker
+            placeholder="Filter"
+            floatingPlaceholder
+            value={pickedOption}
+            enableModalBlur={false}
+            onChange={value => {
+              setPickedOption(String(value));
+              onFilter(convertDatePresetToDates(String(value)));
+            }}
+            topBarProps={{title: 'Filter Orders'}}
+          >
+            {_.map(Object.keys(DATE_PRESETS), option => (
+              <Picker.Item key={option} value={option} label={DATE_PRESETS[option]} />
+            ))}
+          </Picker>
+        </View>
+
+      </StandardContainer>
     </>
   );
 };
@@ -111,17 +202,16 @@ export default function Index() {
   const organizationId = useSelector(
     (state) => state?.auth?.user?.selectedOrganizationId
   );
-
+  const [selectedDate, setSelectedDate] = useState({});
 
   const {
     data: orders,
     isLoading,
     isFetching,
     refetch
-  } = useGetOrdersQuery({ organizationId });
+  } = useGetOrdersQuery({ organizationId, ...selectedDate });
 
   // if (isLoading) return <LoaderScreen message="Loading" overlay />;
-
 
   return (
     <>
@@ -133,9 +223,10 @@ export default function Index() {
         }}
       />
 
-
       <GridList
-        ListHeaderComponent={Header}
+        ListHeaderComponent={<Header onFilter={(values) => {
+          setSelectedDate(values);
+        }}/>}
         data={orders}
         keyExtractor={(item, index) => item + index}
         contentInsetAdjustmentBehavior="never"
