@@ -17,11 +17,12 @@ import {
   Image,
   Spacings,
   View,
-  Text
-} from 'react-native-ui-lib';
+  Text, GridList
+} from "react-native-ui-lib";
 import { useGetOrdersQuery } from 'services/ordersApi';
 import { useGetMeQuery } from 'services/userApi';
 import { useSelector } from "react-redux";
+import { useGetOrganizationStatsQuery } from "../../../../services/organizationApi";
 function getInitials(name) {
   // Check if name is null or not a string, return empty string if true
   if (typeof name !== 'string' || name === null) {
@@ -36,6 +37,10 @@ function getInitials(name) {
 
 const Header = () => {
   const navigation = useNavigation();
+  const organizationId = useSelector(
+    (state) => state?.auth?.user?.selectedOrganizationId
+  );
+  const { data } = useGetOrganizationStatsQuery({organizationId}, {refetchOnMountOrArgChange: true});
   const { data: dataMe } = useGetMeQuery({});
   return (
     <>
@@ -60,19 +65,19 @@ const Header = () => {
             <ScrollView horizontal>
               <Group style={{ gap: 10 }}>
                 <StatCard
-                  label="Total Sales"
-                  value="$3000"
+                  label="Revenue"
+                  value={`$${data?.revenue || 0}`}
                   backgroundColor="#F0EDEC"
                 />
 
                 <StatCard
-                  label="In Progress Orders"
-                  value="10"
+                  label="New Orders"
+                  value={data?.numberOfVideoGiftsNewOrPending || 0}
                   backgroundColor="#F3E1FA"
                 />
                 <StatCard
                   label="Completed Orders"
-                  value="145"
+                  value={data?.numberOfVideoGiftsCompleted || 0}
                   backgroundColor="#EFEDF8"
                 />
               </Group>
@@ -90,43 +95,7 @@ const Header = () => {
     </>
   );
 };
-function groupByOrderStatus(inputData) {
-  const groupedData = {};
 
-  inputData.forEach((item) => {
-    const orderStatus = item.orderStatus;
-
-    // Map "NEW" and "GENERATING_FINAL_VIDEO" to "In Progress"
-    const updatedOrderStatus =
-      orderStatus === 'NEW' || orderStatus === 'GENERATING_FINAL_VIDEO'
-        ? 'In Progress'
-        : orderStatus;
-
-    if (!groupedData[updatedOrderStatus]) {
-      groupedData[updatedOrderStatus] = [];
-    }
-
-    groupedData[updatedOrderStatus].push(item);
-  });
-
-  // Create an array of objects with "title" and "data" properties
-  const result = Object.keys(groupedData).map((orderStatus) => ({
-    title: orderStatus,
-    data: groupedData[orderStatus]
-  }));
-
-  // Define the custom order for sorting
-  const customOrder = ['In Progress', 'COMPLETED'];
-
-  // Sort the result array based on the custom order
-  result.sort((a, b) => {
-    const indexA = customOrder.indexOf(a.title);
-    const indexB = customOrder.indexOf(b.title);
-    return indexA - indexB;
-  });
-
-  return result;
-}
 function formatDate(inputDate) {
   const options = {
     weekday: 'long',
@@ -152,7 +121,7 @@ export default function Index() {
   } = useGetOrdersQuery({ organizationId });
 
   // if (isLoading) return <LoaderScreen message="Loading" overlay />;
-  const groupedByOrderStatus = groupByOrderStatus(orders || []);
+
 
   return (
     <>
@@ -164,41 +133,39 @@ export default function Index() {
         }}
       />
 
-      <SectionList
-        contentInsetAdjustmentBehavior="never"
-        sections={groupedByOrderStatus}
+
+      <GridList
         ListHeaderComponent={Header}
+        data={orders}
         keyExtractor={(item, index) => item + index}
+        contentInsetAdjustmentBehavior="never"
         onRefresh={() => {
           refetch();
         }}
         refreshing={isLoading || isFetching}
-        renderItem={({ item }) => (
-          <OrderItemCard
-            date={formatDate(item.createdAt)}
-            title={item.title}
-            name="Frantz"
-            email="artyfrantz@gmail.com"
-            onPress={() => {
-              router.push({
-                pathname: '/(drawer)/home/videogift-details',
-                params: { videoGiftId: item.id }
-              });
-            }}
-          />
-        )}
-        renderSectionHeader={({ section: { title } }) => (
-          <View
-            style={{
-              margin: 0,
-              // marginTop: 40,
-              padding: 20,
-              backgroundColor: 'white'
-            }}
-          >
-            <SectionTitle>{title}</SectionTitle>
-          </View>
-        )}
+        renderItem={({ item }) => {
+          return (
+            <OrderItemCard
+              date={formatDate(item.createdAt)}
+              title={item.title}
+              data={item}
+              name={`Created by: ${item?.owner.name}`}
+              email={`Recipient: ${item?.videoGiftCustomer?.email}`}
+              onPress={() => {
+                router.push({
+                  pathname: '/(drawer)/home/videogift-details',
+                  params: { videoGiftId: item.id }
+                });
+              }}
+            />
+          );
+        }}
+        numColumns={1}
+        // maxItemWidth={140}
+        // itemSpacing={Spacings.s5}
+        // listPadding={Spacings.s5}
+        // keepItemSize
+        // contentContainerStyle={styles.list}
         ListEmptyComponent={
           <View
             style={{
@@ -208,32 +175,17 @@ export default function Index() {
               alignItems: 'center'
             }}
           >
-            {isFetching || isLoading ? <Text>Loading...</Text> : (
+            {isFetching || isLoading ? (
+              <Text>Loading...</Text>
+            ) : (
               <>
-                <Image source={require("../../../../../assets/empty.png")} />
-                <Text>No Orders found!</Text></>
+                <Image source={require('../../../../../assets/empty.png')} />
+                <Text>No Orders found!</Text>
+              </>
             )}
           </View>
         }
       />
-
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        {/* <GridList
-          ListHeaderComponent={
-            <Text h1 marginB-s5>
-              GridList
-            </Text>
-          }
-          data={videogifts?.data}
-          renderItem={Item}
-          numColumns={1}
-          // maxItemWidth={140}
-          itemSpacing={Spacings.s5}
-          listPadding={Spacings.s5}
-          // keepItemSize
-          contentContainerStyle={styles.list}
-        /> */}
-      </View>
     </>
   );
 }

@@ -56,6 +56,7 @@ const PREVIEW_WIDTH = 120;
 
 const VideoPreview = ({ item, index, drag, isActive }) => {
   const router = useRouter();
+  console.log('item', item);
   return (
     <ScaleDecorator>
       <View style={{ height: PREVIEW_WIDTH + 10 }}>
@@ -84,7 +85,7 @@ const VideoPreview = ({ item, index, drag, isActive }) => {
         >
           <ProgressiveImage
             thumbnailSource={require('../../../../../assets/loading.png')}
-            source={{ uri: `${item?.media?.previewImageUrl}` }}
+            source={{ uri: `${item?.media?.transcoderJobStatus === 'PENDING'? require('../../../../../assets/loading.png') : item?.media?.previewImageUrl}` }}
             style={{ width: PREVIEW_WIDTH, height: PREVIEW_WIDTH - 50 }}
             resizeMode="cover"
           />
@@ -122,7 +123,7 @@ const DetailScreen = ({ videoGiftData }) => {
   const organizationId = useSelector(
     (state) => state?.auth?.user?.selectedOrganizationId
   );
-  // const [data, setData] = useState([]);
+  const [data, setData] = useState([]);
   const [imageLoading, setImageLoading] = useState(false);
   const videoPreviewFlatlist = useRef(null);
   const windowWidth = Dimensions.get('window').width;
@@ -183,7 +184,7 @@ const DetailScreen = ({ videoGiftData }) => {
   };
 
   const {
-    data,
+    data:selectedMedia,
     isLoading: selectMediaIsLoading,
     refetch: refetchSelectedMedia
   } = useGetSelectedMediaQuery({
@@ -191,13 +192,9 @@ const DetailScreen = ({ videoGiftData }) => {
     organizationId
   }, { refetchOnMountOrArgChange: true });
 
-  // useEffect(() => {
-    console.log('selectedMedia', data, {
-      videoGiftId: videoGiftData?.videoGift?.id,
-      organizationId
-    });
-  //   setData(selectedMedia);
-  // }, [selectedMedia]);
+  useEffect(() => {
+    setData(selectedMedia);
+  }, [selectedMedia]);
 
   return (
     <View style={{ flex: 1 }}>
@@ -252,7 +249,6 @@ const DetailScreen = ({ videoGiftData }) => {
           keyExtractor={(item) => item.id}
           /* @ts-ignore */
           renderItem={({ item, index, drag, isActive }) => {
-            console.info('item ', item);
             return (
               <VideoPreview
                 item={item}

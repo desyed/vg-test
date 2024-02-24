@@ -20,6 +20,15 @@ const organizationApi = rootApi.injectEndpoints({
         method: 'GET'
       })
     }),
+    getOrganizationStats: builder.query({
+      query: ({ startDate, endDate, organizationId }: {organizationId:string, startDate?: string, endDate?: string}) => ({
+        url: `/organization/${organizationId}/stats`,
+        method: 'GET',
+        params: {
+          startDate, endDate
+        }
+      })
+    }),
     getOrgUserById: builder.query({
       providesTags: ['OrganizationsUsers'],
       query: ({ id, organizationId }) => ({
@@ -55,6 +64,7 @@ const organizationApi = rootApi.injectEndpoints({
 
 export const {
   useSearchOrganizationUsersQuery,
+  useGetOrganizationStatsQuery,
   useGetVideoGiftExperiencesQuery,
   useCreateOrgUserMutation,
   useUpdateOrgUserMutation,
