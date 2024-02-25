@@ -123,7 +123,7 @@ export default function Index() {
   };
 
   useEffect(() => {
-    if (!user.organizationId) return;
+    if (!user.organizationId) {};
   }, [user.organizationId]);
 
   const updateData = filter(pick(orders, ['updateDate']), Boolean);

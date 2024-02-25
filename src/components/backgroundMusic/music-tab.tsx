@@ -14,6 +14,7 @@ import { LoaderView } from '../ui/LoaderView';
 import { PrimaryButton } from '../ui/PrimaryButton';
 import { StandardContainer } from '../ui/StandardContainer';
 import { SectionTitle } from '../ui/Title';
+import _ from "lodash";
 
 const hairlineWidth = StyleSheet.hairlineWidth;
 
@@ -47,7 +48,7 @@ const MusicTab = ({ videoGiftId }: { videoGiftId: string }) => {
           console.log('Unloading Sound');
           sound.unloadAsync();
         }
-      : undefined;
+      : _.noop;
   }, [sound]);
 
   const router = useRouter();

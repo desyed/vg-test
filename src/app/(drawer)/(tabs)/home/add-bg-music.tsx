@@ -17,6 +17,7 @@ import {
 
 import hairlineWidth = StyleSheet.hairlineWidth;
 import { useSelector } from "react-redux";
+import _ from "lodash";
 
 const Item = ({
   data: { item },
@@ -104,7 +105,7 @@ const AddBgMusic = () => {
             console.log(e);
           }
         }
-      : undefined;
+      : _.noop;
   }, [sound]);
 
   const router = useRouter();
