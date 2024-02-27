@@ -4,8 +4,8 @@ import { rootApi } from './rootApi';
 const awsApi = rootApi.injectEndpoints({
   endpoints: (builder) => ({
     createMedia: builder.mutation({
-      query: (payload) => ({
-        url: '/media/create',
+      query: ({ organizationId, ...payload }) => ({
+        url: `/organization/${organizationId}/media/create`,
         method: 'POST',
         body: {
           previewImageUrl: payload.previewImageUrl,
@@ -13,6 +13,23 @@ const awsApi = rootApi.injectEndpoints({
           videoGiftId: payload.videoGiftId,
           type: payload.type,
           participantId: payload.participantId
+        }
+      })
+    }),
+
+    createBatchMedia: builder.mutation({
+      invalidatesTags: ['Media', 'SelectedMedia'],
+      query: ({ videoGiftId, participantId, medias, organizationId }) => ({
+        url: `/organization/${organizationId}/media/batch`,
+        method: 'POST',
+        body: {
+          // previewImageUrl: payload.previewImageUrl,
+          // originalKey: payload.originalKey,
+          // videoType: payload.videoType,
+          // type: payload.type,
+          videoGiftId,
+          participantId,
+          medias
         }
       })
     }),
@@ -35,23 +52,23 @@ const awsApi = rootApi.injectEndpoints({
               'SelectedMedia'
             ]
           : ['SelectedMedia'],
-      query: (payload) => ({
-        url: '/media/selected',
+      query: ({ organizationId, videoGiftId }) => ({
+        url: `/organization/${organizationId}/media/selected`,
         method: 'GET',
         params: {
-          videoGiftId: payload.videoGiftId
+          videoGiftId
         }
       })
     }),
     getMediaById: builder.query({
       query: (payload) => ({
-        url: `/media/${payload.mediaId}`,
+        url: `/organization/${payload?.organizationId}/media/${payload.mediaId}`,
         method: 'GET'
       })
     }),
     getSelectedMediaById: builder.query({
       query: (payload) => ({
-        url: `/selectedMedia`,
+        url: `/organization/${payload?.organizationId}/selectedMedia`,
         method: 'GET',
         params: {
           selectedMediaId: payload.selectedMediaId
@@ -63,8 +80,8 @@ const awsApi = rootApi.injectEndpoints({
         { type: 'SelectedMedia', id: arg.selectedMediaId },
         'SelectedMedia'
       ],
-      query: ({ videoGiftId, selectedMedia }) => ({
-        url: '/media/selected',
+      query: ({ videoGiftId, selectedMedia, organizationId }) => ({
+        url: `/organization/${organizationId}/media/selected`,
         method: 'PATCH',
         body: {
           videoGiftId,
@@ -74,9 +91,8 @@ const awsApi = rootApi.injectEndpoints({
     }),
     patchSelectedMedia: builder.mutation({
       query: (payload) => ({
-        url: `/selectedMedia`,
+        url: `/organization/${payload?.organizationId}/selectedMedia`,
         method: 'PATCH',
-
         body: {
           ...pick(payload, ['title', 'subTitle', 'selectedMediaId'])
         }
@@ -84,7 +100,7 @@ const awsApi = rootApi.injectEndpoints({
     }),
     selectMedia: builder.mutation({
       query: (payload) => ({
-        url: '/media/selected',
+        url: `/organization/${payload?.organizationId}/media/selected`,
         method: 'POST',
         body: {
           order: payload.order || 'NEXT',
@@ -99,6 +115,7 @@ const awsApi = rootApi.injectEndpoints({
 
 export const {
   useCreateMediaMutation,
+  useCreateBatchMediaMutation,
   useSelectMediaMutation,
   useGetSelectedMediaQuery,
   useGetMediaByIdQuery,

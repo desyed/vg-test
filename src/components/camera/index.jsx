@@ -4,26 +4,43 @@ import { MediaPreview } from 'components/camera/MediaPreview';
 import { CAMERA_TYPE } from 'constants';
 import { Camera, CameraType } from 'expo-camera';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { isEmpty } from 'lodash';
-import { useEffect, useRef, useState } from "react";
-import { Button, Dimensions, Pressable, StyleSheet, View } from "react-native";
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { SegmentedControl, Text } from 'react-native-ui-lib';
 import * as ScreenOrientation from 'expo-screen-orientation';
+import { isEmpty } from 'lodash';
+import { useEffect, useRef, useState } from 'react';
+import {Button, Dimensions, Pressable, StyleSheet, View} from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import {
+  Dialog,
+  Image,
+  PanningProvider,
+  SegmentedControl,
+  Modal,
+  Text,
+  TouchableOpacity
+} from 'react-native-ui-lib';
 import uuid from 'react-native-uuid';
+import AntDesign from 'react-native-vector-icons/AntDesign';
 
-export function CameraRecorder() {
+import CountUp from './countUp';
+
+export function CameraRecorder({ videoGift, prompts, lastMedia }) {
   const router = useRouter();
-  const searchParams = useLocalSearchParams();
-
+  console.log('videoGift', videoGift, prompts, lastMedia);
   const cameraRef = useRef(null);
   const [media, setMedia] = useState([]);
   const [type, setType] = useState(CameraType.back);
   const [cameraType, setCameraType] = useState(CAMERA_TYPE.VIDEO);
 
+
+  const previewImageUrl =
+    lastMedia?.type === 'IMAGE'
+      ? lastMedia?.signedUrl?.url
+      : lastMedia?.previewImageUrl;
+
   const [permission, requestPermission] = Camera.useCameraPermissions();
 
   const [recording, setRecording] = useState(false);
+  const [resetCounter, setResetCounter] = useState(false);
   const insets = useSafeAreaInsets();
 
   /* enum Orientation {
@@ -34,34 +51,38 @@ export function CameraRecorder() {
         LANDSCAPE_RIGHT = 4
     } */
 
-  const [orientation, setOrientation] = useState(1)
+  const [orientation, setOrientation] = useState(1);
 
-  const detectOrientation= async () => {
+  const detectOrientation = async () => {
     let orientation = await ScreenOrientation.getOrientationAsync();
     const screen = Dimensions.get('screen');
     if (orientation === 0) {
-      orientation = screen.width > screen.height ? ScreenOrientation.Orientation.LANDSCAPE : ScreenOrientation.Orientation.PORTRAIT;
+      orientation =
+        screen.width > screen.height
+          ? ScreenOrientation.Orientation.LANDSCAPE
+          : ScreenOrientation.Orientation.PORTRAIT;
     }
     setOrientation(orientation);
   };
 
   useEffect(async () => {
-    await detectOrientation()
+    await detectOrientation();
     const subscription = ScreenOrientation.addOrientationChangeListener(
       handleOrientationChange
     );
     return () => {
       ScreenOrientation.removeOrientationChangeListeners(subscription);
     };
-  }, [])
+  }, []);
 
   const handleOrientationChange = (o) => {
-    alert(o.orientationInfo.orientation)
-  }
+    alert(o.orientationInfo.orientation);
+  };
 
   const beginVideo = async () => {
     if (recording) {
       setRecording(false);
+      setResetCounter(true);
       return cameraRef.current.stopRecording();
     } else {
       setRecording(true);
@@ -123,12 +144,6 @@ export function CameraRecorder() {
           <View style={[styles.buttonContainer, { paddingTop: insets?.top }]}>
             <View
               style={{
-                // width: '50%',
-                // position: 'absolute',
-                // top: insets?.top,
-                // left: '50%',
-                // alignSelf: 'center'
-
                 flex: 1,
                 flexDirection: 'row',
                 // justifyContent: 'space-between',
@@ -137,29 +152,51 @@ export function CameraRecorder() {
               }}
             >
               <View style={{ flex: 1, paddingLeft: 15 }}>
-                <Pressable
-                  onPress={() => {
-                    router.back();
-                  }}
-                >
-                  <Ionicons name="close-circle-sharp" size={32} color="white" />
-                </Pressable>
+                {/*<Pressable*/}
+                {/*  onPress={() => {*/}
+                {/*    router.back();*/}
+                {/*  }}*/}
+                {/*>*/}
+                {/*  <Ionicons name="close-circle-sharp" size={32} color="white" />*/}
+                {/*</Pressable>*/}
+                <TouchableOpacity>
+                  <AntDesign name="questioncircleo" size={28} color="white" />
+                </TouchableOpacity>
+                {/*<Dialog*/}
+                {/*  visible*/}
+                {/*  onDismiss={() => console.log('dismissed')}*/}
+                {/*  // panDirection={PanningProvider.Directions.DOWN}*/}
+                {/*>*/}
+                {/*  <Text text60>Content</Text>*/}
+                {/*</Dialog>*/}
+
               </View>
               <View
                 style={{
                   flex: 1,
-
-                  marginHorizontal: 0
+                  marginHorizontal: 0,
+                  paddingTop: 10
                 }}
               >
-                <SegmentedControl
-                  onChangeIndex={(index) => {
-                    if (index === 0) setCameraType(CAMERA_TYPE.VIDEO);
-                    if (index === 1) setCameraType(CAMERA_TYPE.PHOTO);
-                  }}
-                  activeColor="green"
-                  backgroundColor="transparent"
-                  segments={[{ label: 'Video' }, { label: 'Photo' }]}
+                {/*<SegmentedControl*/}
+                {/*  onChangeIndex={(index) => {*/}
+                {/*    if (index === 0) setCameraType(CAMERA_TYPE.VIDEO);*/}
+                {/*    if (index === 1) setCameraType(CAMERA_TYPE.PHOTO);*/}
+                {/*  }}*/}
+                {/*  activeColor="green"*/}
+                {/*  activeBackgroundColor="transparent"*/}
+                {/*  outlineColor="transparent"*/}
+                {/*  containerStyle={{ borderWidth: 0 }}*/}
+                {/*  borderColor="transparent"*/}
+                {/*  backgroundColor="transparent"*/}
+                {/*  segments={[{ label: 'Video' }, { label: 'Photo' }]}*/}
+                {/*/>*/}
+
+                <CountUp
+                  isReset={resetCounter}
+                  isRunning={recording}
+                  limit={10}
+                  onLimitReached={() => beginVideo()}
                 />
               </View>
               <View
@@ -172,34 +209,43 @@ export function CameraRecorder() {
                   alignItems: 'flex-start'
                 }}
               >
-                {!isEmpty(media) && (
-                  <View
-                    style={{
-                      display: 'flex',
-                      justifyContent: 'center',
-                      alignItems: 'center'
-                    }}
-                  >
-                    <View
-                      style={{
-                        width: 40,
-                        backgroundColor: 'white',
-                        borderRadius: '50%',
-                        display: 'flex',
-                        justifyContent: 'center',
-                        alignItems: 'center'
-                      }}
-                    >
-                      <Ionicons
-                        //   style={{ backgroundColor: 'white', borderRadius: 50 }}
-                        name="checkmark-circle-outline"
-                        size={32}
-                        color="green"
-                      />
-                    </View>
-                    <Text color="white">DONE</Text>
-                  </View>
-                )}
+                <Pressable onPress={toggleCameraType}>
+                  <Ionicons
+                    //   style={{ backgroundColor: 'white', borderRadius: 50 }}
+                    name="sync-sharp"
+                    size={32}
+                    color="white"
+                  />
+                </Pressable>
+
+                {/*{!isEmpty(media) && (*/}
+                {/*  <View*/}
+                {/*    style={{*/}
+                {/*      display: 'flex',*/}
+                {/*      justifyContent: 'center',*/}
+                {/*      alignItems: 'center'*/}
+                {/*    }}*/}
+                {/*  >*/}
+                {/*    <View*/}
+                {/*      style={{*/}
+                {/*        width: 40,*/}
+                {/*        backgroundColor: 'white',*/}
+                {/*        // borderRadius: '50%',*/}
+                {/*        display: 'flex',*/}
+                {/*        justifyContent: 'center',*/}
+                {/*        alignItems: 'center'*/}
+                {/*      }}*/}
+                {/*    >*/}
+                {/*      <Ionicons*/}
+                {/*        //   style={{ backgroundColor: 'white', borderRadius: 50 }}*/}
+                {/*        name="checkmark-circle-outline"*/}
+                {/*        size={32}*/}
+                {/*        color="green"*/}
+                {/*      />*/}
+                {/*    </View>*/}
+                {/*    <Text color="white">DONE</Text>*/}
+                {/*  </View>*/}
+                {/*)}*/}
               </View>
             </View>
 
@@ -211,35 +257,56 @@ export function CameraRecorder() {
               <View
                 style={{
                   display: 'flex',
-                  width: '80%',
+                  width: '100%',
                   flexDirection: 'row',
                   justifyContent: 'space-between',
                   alignItems: 'center'
                 }}
               >
-                <Pressable onPress={toggleCameraType}>
-                  <Ionicons
-                    //   style={{ backgroundColor: 'white', borderRadius: 50 }}
-                    name="sync-sharp"
-                    size={32}
-                    color="white"
+                <View>
+                  <Image
+                    source={{ uri: previewImageUrl }}
+                    style={{ width: 50, height: 50, borderRadius: 5 }}
                   />
-                </Pressable>
-                <CameraButton
-                  beginVideo={beginVideo}
-                  recording={recording}
-                  cameraType={cameraType}
-                  takePicture={takePicture}
-                />
-                <View style={{ width: 32 }} />
+                </View>
+                <View style={{display:'flex',flex:1, justifyContent:'center', alignItems:'center', flexDirection:'column'}}>
+                  <View style={{display: 'flex', gap:2, marginBottom: 10, justifyContent:'center', flexDirection:'row', width: '100%'}}>
+                    <TouchableOpacity onPress={() => setCameraType(CAMERA_TYPE.VIDEO)}>
+                      <Text color={cameraType === 'video' ? 'orange' : 'white'} style={{marginRight:5}}>
+                        Video
+                      </Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={() => setCameraType(CAMERA_TYPE.PHOTO)}>
+                      <Text color={cameraType === 'photo' ? 'orange' : 'white'} style={{marginRight:5}}>Photo</Text>
+                    </TouchableOpacity>
+                  </View>
+                  <CameraButton
+                    beginVideo={beginVideo}
+                    recording={recording}
+                    cameraType={cameraType}
+                    takePicture={takePicture}
+                  />
+                </View>
+                <View>
+                  {/*<MediaPreview*/}
+                  {/*  media={media}*/}
+                  {/*  setMedia={setMedia}*/}
+                  {/*  videoGiftId={searchParams.videoGiftId}*/}
+                  {/*/>*/}
+                  <Pressable
+                    onPress={() => {
+                      router.back();
+                    }}
+                  >
+                    <Ionicons
+                      name="checkbox-outline"
+                      size={60}
+
+                      color="white"
+                    />
+                  </Pressable>
+                </View>
               </View>
-            </View>
-            <View style={{ position: 'absolute', bottom: 0, right: 0 }}>
-              <MediaPreview
-                media={media}
-                setMedia={setMedia}
-                videoGiftId={searchParams.videoGiftId}
-              />
             </View>
           </View>
         </Camera>
@@ -252,7 +319,8 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
-    display: 'relative'
+    position: 'relative',
+    display: 'flex'
   },
   camera: {
     height: '100%',

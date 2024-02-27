@@ -2,6 +2,7 @@ import { rootApi } from './rootApi';
 
 export interface User {
   id?: string | number;
+  organizationId: string;
   image?: string;
   email?: string;
   name?: string;
@@ -14,37 +15,46 @@ const organizationApi = rootApi.injectEndpoints({
   endpoints: (builder) => ({
     searchOrganizationUsers: builder.query({
       providesTags: ['OrganizationsUsers'],
-      query: (credentials) => ({
-        url: '/organization/users',
+      query: ({organizationId}) => ({
+        url: `/organization/${organizationId}/users`,
         method: 'GET'
+      })
+    }),
+    getOrganizationStats: builder.query({
+      query: ({ startDate, endDate, organizationId }: {organizationId:string, startDate?: string, endDate?: string}) => ({
+        url: `/organization/${organizationId}/stats`,
+        method: 'GET',
+        params: {
+          startDate, endDate
+        }
       })
     }),
     getOrgUserById: builder.query({
       providesTags: ['OrganizationsUsers'],
-      query: (id) => ({
-        url: `/organization/users/${id}`,
+      query: ({ id, organizationId }) => ({
+        url: `/organization/${organizationId}/users/${id}`,
         method: 'GET'
       })
     }),
     createOrgUser: builder.mutation({
       invalidatesTags: ['OrganizationsUsers'],
-      query: (body: User) => ({
-        url: '/organization/users',
+      query: ({ organizationId, ...body }: User) => ({
+        url: `/organization/${organizationId}/users`,
         method: 'POST',
         body
       })
     }),
     updateOrgUser: builder.mutation({
       invalidatesTags: ['OrganizationsUsers'],
-      query: (body : User) => ({
-        url: `/organization/users`,
+      query: ({ organizationId, ...body } : User) => ({
+        url: `/organization/${organizationId}/users`,
         method: 'PATCH',
         body
       })
     }),
     getVideoGiftExperiences: builder.query({
-      query: (credentials) => ({
-        url: '/organization/videogifts',
+      query: ({organizationId}) => ({
+        url: `/organization/${organizationId}/videogifts`,
         method: 'GET'
       })
     })
@@ -54,6 +64,7 @@ const organizationApi = rootApi.injectEndpoints({
 
 export const {
   useSearchOrganizationUsersQuery,
+  useGetOrganizationStatsQuery,
   useGetVideoGiftExperiencesQuery,
   useCreateOrgUserMutation,
   useUpdateOrgUserMutation,

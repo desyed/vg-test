@@ -16,10 +16,14 @@ import { KeyboardAvoidingWrapper } from '../../../../components/ui/KeyboardAvoid
 import { LoaderView } from '../../../../components/ui/LoaderView';
 import { StandardContainer } from '../../../../components/ui/StandardContainer';
 import { useSearchOrganizationUsersQuery } from '../../../../services/organizationApi';
+import { useSelector } from "react-redux";
 
 const Organizations = () => {
+  const organizationId = useSelector(
+    (state) => state?.auth?.user?.selectedOrganizationId
+  );
   // @ts-ignore
-  const { data, isLoading } = useSearchOrganizationUsersQuery();
+  const { data, isLoading } = useSearchOrganizationUsersQuery({organizationId});
 
   console.log(data);
 

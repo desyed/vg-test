@@ -19,10 +19,12 @@ import { SectionTitle } from '../../../../components/ui/Title';
 const hairlineWidth = StyleSheet.hairlineWidth;
 
 import {
+  useGetAllThemesQuery,
   useGetThemeCategoriesQuery,
   useLazyGetAllThemesQuery
-} from '../../../../services/themesApi';
+} from "../../../../services/themesApi";
 import { usePatchVideoGiftMutation } from '../../../../services/videoGiftApi';
+import { useSelector } from "react-redux";
 
 const SelectTheme = () => {
   const [selectedCat, setSelectedCat] = useState('');
@@ -30,26 +32,23 @@ const SelectTheme = () => {
   const searchParams = useLocalSearchParams();
 
   const router = useRouter();
+  const organizationId = useSelector(
+    (state) => state?.auth?.user?.selectedOrganizationId
+  );
 
-  const [getThemes, { data, isLoading, isFetching }] = useLazyGetAllThemesQuery();
+  const { data, isLoading, isFetching } = useGetAllThemesQuery({organizationId, catId: selectedCat});
   const [patchVideoGift, { data: res, isLoading: patchLoading }] =
     usePatchVideoGiftMutation();
   const onSelectTheme = (item: any) => {
-    patchVideoGift({ id: searchParams?.videoGiftId, themeId: item.id });
+    patchVideoGift({ id: searchParams?.videoGiftId, themeId: item.id, organizationId });
   };
 
   if (!patchLoading && res) {
     router.back();
   }
 
-  useEffect(() => {
-    getThemes('');
-  }, []);
-
   const changeSelectedCat = (catId) => {
     setSelectedCat(catId);
-    // get musics
-    getThemes(catId);
   };
 
   const { data: category } = useGetThemeCategoriesQuery('');

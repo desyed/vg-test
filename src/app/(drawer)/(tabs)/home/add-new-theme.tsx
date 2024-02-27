@@ -27,8 +27,12 @@ import { getInitials } from '../../../../utils/utils';
 import { TextInput } from '../../../../components/ui/form/TextInput';
 import { SelectInput } from '../../../../components/ui/form/SelectInput';
 import { PrimaryButton } from '../../../../components/ui/PrimaryButton';
+import { useSelector } from "react-redux";
 
 const AddTheme = () => {
+  const organizationId = useSelector(
+    (state) => state?.auth?.user?.selectedOrganizationId
+  );
   const [selectedCat, setSelectedCat] = useState('');
 
   const searchParams = useLocalSearchParams();
@@ -43,7 +47,8 @@ const AddTheme = () => {
   const onSelectMusic = (id) => {
     selectBgMusic({
       videoGiftId: String(searchParams?.videoGiftId),
-      backgroundMusicId: id
+      backgroundMusicId: id,
+      organizationId
     });
   };
 

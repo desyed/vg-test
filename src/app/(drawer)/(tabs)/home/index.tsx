@@ -5,9 +5,10 @@ import { Group } from 'components/ui/Group';
 import { PrimaryButton } from 'components/ui/PrimaryButton';
 import { StandardContainer } from 'components/ui/StandardContainer';
 import { StatCard } from 'components/ui/StatCard';
-import { SectionTitle } from 'components/ui/Title';
+import dayjs from 'dayjs'
 import { router, useNavigation } from 'expo-router';
 import { Drawer } from 'expo-router/drawer';
+import { useState } from 'react';
 import { ScrollView, SectionList, StyleSheet } from 'react-native';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -17,10 +18,77 @@ import {
   Image,
   Spacings,
   View,
-  Text
-} from 'react-native-ui-lib';
+  Text,
+  GridList,
+  ActionSheet, Picker, Colors
+} from "react-native-ui-lib";
+import { useSelector } from 'react-redux';
 import { useGetOrdersQuery } from 'services/ordersApi';
 import { useGetMeQuery } from 'services/userApi';
+
+import { useGetOrganizationStatsQuery } from '../../../../services/organizationApi';
+import _ from "lodash";
+
+export const DATE_PRESETS = {
+  ALL: 'ALL',
+  TODAY: 'TODAY',
+  YESTERDAY: 'YESTERDAY',
+  CURRENT_WEEK: 'CURRENT WEEK',
+  LAST_WEEK: 'LAST WEEK',
+  CURRENT_MONTH: 'CURRENT MONTH',
+  LAST_MONTH: 'LAST MONTH',
+  YTD: 'YTD'
+};
+export const convertDatePresetToDates = (value) => {
+
+  switch (value) {
+    case 'ALL':
+      return {
+        startDate: null,
+        endDate: null,
+      }
+    case 'TODAY':
+      return {
+        startDate: dayjs().startOf('day').toDate().toISOString(),
+        endDate: dayjs().endOf('day').toDate().toISOString(),
+      }
+    case 'YESTERDAY':
+      return {
+        startDate: dayjs().subtract(1, 'day').startOf('day').toDate().toISOString(),
+        endDate: dayjs().subtract(1, 'day').endOf('day').toDate().toISOString(),
+      }
+    case 'CURRENT_WEEK':
+      return {
+        startDate: dayjs().startOf('week').toDate().toISOString(),
+        endDate: dayjs().endOf('week').toDate().toISOString(),
+      }
+    case 'LAST_WEEK':
+      return {
+        startDate: dayjs().subtract(1, 'week').startOf('week').toDate().toISOString(),
+        endDate: dayjs().subtract(1, 'week').endOf('week').toDate().toISOString(),
+      }
+    case 'CURRENT_MONTH':
+      return {
+        startDate: dayjs().startOf('month').toDate().toISOString(),
+        endDate: dayjs().endOf('month').toDate().toISOString(),
+      }
+    case 'LAST_MONTH':
+      return {
+        startDate: dayjs().subtract(1, 'month').startOf('month').toDate().toISOString(),
+        endDate: dayjs().subtract(1, 'month').endOf('month').toDate().toISOString(),
+      }
+    case 'YTD':
+      return {
+        startDate: dayjs().startOf('year').toDate().toISOString(),
+        endDate: dayjs().endOf('year').toDate().toISOString(),
+      }
+    default:
+      return {
+        startDate: undefined,
+        endDate:  undefined,
+      }
+  }
+}
 function getInitials(name) {
   // Check if name is null or not a string, return empty string if true
   if (typeof name !== 'string' || name === null) {
@@ -33,9 +101,18 @@ function getInitials(name) {
   return initials;
 }
 
-const Header = () => {
+const Header = ({onFilter}) => {
   const navigation = useNavigation();
-  const { data: dataMe } = useGetMeQuery();
+  const organizationId = useSelector(
+    (state) => state?.auth?.user?.selectedOrganizationId
+  );
+  const { data } = useGetOrganizationStatsQuery(
+    { organizationId },
+    { refetchOnMountOrArgChange: true }
+  );
+  const [showActionSheet, setShowActionSheet] = useState(false);
+  const [pickedOption, setPickedOption] = useState(DATE_PRESETS.ALL);
+  const { data: dataMe } = useGetMeQuery({});
   return (
     <>
       <View style={styles.topContainer}>
@@ -44,7 +121,7 @@ const Header = () => {
             <Group>
               <TouchableOpacity
                 onPress={() => {
-                  navigation.toggleDrawer();
+                  navigation?.toggleDrawer();
                 }}
               >
                 <Avatar
@@ -59,19 +136,19 @@ const Header = () => {
             <ScrollView horizontal>
               <Group style={{ gap: 10 }}>
                 <StatCard
-                  label="Total Sales"
-                  value="$3000"
+                  label="Revenue"
+                  value={`$${data?.revenue || 0}`}
                   backgroundColor="#F0EDEC"
                 />
 
                 <StatCard
-                  label="In Progress Orders"
-                  value="10"
+                  label="New Orders"
+                  value={data?.numberOfVideoGiftsNewOrPending || 0}
                   backgroundColor="#F3E1FA"
                 />
                 <StatCard
                   label="Completed Orders"
-                  value="145"
+                  value={data?.numberOfVideoGiftsCompleted || 0}
                   backgroundColor="#EFEDF8"
                 />
               </Group>
@@ -86,46 +163,30 @@ const Header = () => {
           label="Create Order"
         />
       </StandardContainer>
+      <StandardContainer>
+        <View>
+          <Picker
+            placeholder="Filter"
+            floatingPlaceholder
+            value={pickedOption}
+            enableModalBlur={false}
+            onChange={value => {
+              setPickedOption(String(value));
+              onFilter(convertDatePresetToDates(String(value)));
+            }}
+            topBarProps={{title: 'Filter Orders'}}
+          >
+            {_.map(Object.keys(DATE_PRESETS), option => (
+              <Picker.Item key={option} value={option} label={DATE_PRESETS[option]} />
+            ))}
+          </Picker>
+        </View>
+
+      </StandardContainer>
     </>
   );
 };
-function groupByOrderStatus(inputData) {
-  const groupedData = {};
 
-  inputData.forEach((item) => {
-    const orderStatus = item.orderStatus;
-
-    // Map "NEW" and "GENERATING_FINAL_VIDEO" to "In Progress"
-    const updatedOrderStatus =
-      orderStatus === 'NEW' || orderStatus === 'GENERATING_FINAL_VIDEO'
-        ? 'In Progress'
-        : orderStatus;
-
-    if (!groupedData[updatedOrderStatus]) {
-      groupedData[updatedOrderStatus] = [];
-    }
-
-    groupedData[updatedOrderStatus].push(item);
-  });
-
-  // Create an array of objects with "title" and "data" properties
-  const result = Object.keys(groupedData).map((orderStatus) => ({
-    title: orderStatus,
-    data: groupedData[orderStatus]
-  }));
-
-  // Define the custom order for sorting
-  const customOrder = ['In Progress', 'COMPLETED'];
-
-  // Sort the result array based on the custom order
-  result.sort((a, b) => {
-    const indexA = customOrder.indexOf(a.title);
-    const indexB = customOrder.indexOf(b.title);
-    return indexA - indexB;
-  });
-
-  return result;
-}
 function formatDate(inputDate) {
   const options = {
     weekday: 'long',
@@ -138,19 +199,19 @@ function formatDate(inputDate) {
 }
 
 export default function Index() {
+  const organizationId = useSelector(
+    (state) => state?.auth?.user?.selectedOrganizationId
+  );
+  const [selectedDate, setSelectedDate] = useState({});
+
   const {
     data: orders,
     isLoading,
     isFetching,
     refetch
-  } = useGetOrdersQuery({});
+  } = useGetOrdersQuery({ organizationId, ...selectedDate });
 
   // if (isLoading) return <LoaderScreen message="Loading" overlay />;
-  const groupedByOrderStatus = groupByOrderStatus(orders || []);
-
-  if(orders){
-    console.info('ordersz', JSON.stringify(groupedByOrderStatus?.data));
-  }
 
   return (
     <>
@@ -162,41 +223,40 @@ export default function Index() {
         }}
       />
 
-      <SectionList
-        contentInsetAdjustmentBehavior="never"
-        sections={groupedByOrderStatus}
-        ListHeaderComponent={Header}
+      <GridList
+        ListHeaderComponent={<Header onFilter={(values) => {
+          setSelectedDate(values);
+        }}/>}
+        data={orders}
         keyExtractor={(item, index) => item + index}
+        contentInsetAdjustmentBehavior="never"
         onRefresh={() => {
           refetch();
         }}
         refreshing={isLoading || isFetching}
-        renderItem={({ item }) => (
-          <OrderItemCard
-            date={formatDate(item.createdAt)}
-            title={item.title}
-            name="Frantz"
-            email="artyfrantz@gmail.com"
-            onPress={() => {
-              router.push({
-                pathname: '/(drawer)/home/videogift-details',
-                params: { videoGiftId: item.id }
-              });
-            }}
-          />
-        )}
-        renderSectionHeader={({ section: { title } }) => (
-          <View
-            style={{
-              margin: 0,
-              // marginTop: 40,
-              padding: 20,
-              backgroundColor: 'white'
-            }}
-          >
-            <SectionTitle>{title}</SectionTitle>
-          </View>
-        )}
+        renderItem={({ item }) => {
+          return (
+            <OrderItemCard
+              date={formatDate(item.createdAt)}
+              title={item.title}
+              data={item}
+              name={`Created by: ${item?.owner.name}`}
+              email={`Recipient: ${item?.videoGiftCustomer?.email}`}
+              onPress={() => {
+                router.push({
+                  pathname: '/(drawer)/home/videogift-details',
+                  params: { videoGiftId: item.id }
+                });
+              }}
+            />
+          );
+        }}
+        numColumns={1}
+        // maxItemWidth={140}
+        // itemSpacing={Spacings.s5}
+        // listPadding={Spacings.s5}
+        // keepItemSize
+        // contentContainerStyle={styles.list}
         ListEmptyComponent={
           <View
             style={{
@@ -206,32 +266,17 @@ export default function Index() {
               alignItems: 'center'
             }}
           >
-            {isFetching || isLoading ? <Text>Loading...</Text> : (
+            {isFetching || isLoading ? (
+              <Text>Loading...</Text>
+            ) : (
               <>
-                <Image source={require("../../../../../assets/empty.png")} />
-                <Text>No Orders found!</Text></>
+                <Image source={require('../../../../../assets/empty.png')} />
+                <Text>No Orders found!</Text>
+              </>
             )}
           </View>
         }
       />
-
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        {/* <GridList
-          ListHeaderComponent={
-            <Text h1 marginB-s5>
-              GridList
-            </Text>
-          }
-          data={videogifts?.data}
-          renderItem={Item}
-          numColumns={1}
-          // maxItemWidth={140}
-          itemSpacing={Spacings.s5}
-          listPadding={Spacings.s5}
-          // keepItemSize
-          contentContainerStyle={styles.list}
-        /> */}
-      </View>
     </>
   );
 }

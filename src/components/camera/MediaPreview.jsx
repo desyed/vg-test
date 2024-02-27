@@ -6,15 +6,18 @@ import { StyleSheet } from 'react-native';
 import { Image, Text, View } from 'react-native-ui-lib';
 import { useGetSignedPutUrlMutation } from 'services/awsApi';
 import {
+  useCreateBatchMediaMutation,
   useCreateMediaMutation,
   useSelectMediaMutation
-} from 'services/mediaApi';
+} from "services/mediaApi";
 import { createMediaUploadTask } from 'utils/uploadUtil';
+import { useSelector } from "react-redux";
 
 export const MediaPreview = ({ media, setMedia, videoGiftId }) => {
+  const organizationId = useSelector(state => state.auth?.user?.selectedOrganizationId)
   const [getSignedPutUrl] = useGetSignedPutUrlMutation();
-  const [createMedia] = useCreateMediaMutation();
-  const [selectMedia] = useSelectMediaMutation();
+  const [createMedia] = useCreateBatchMediaMutation();
+  // const [selectMedia] = useSelectMediaMutation();
   const video = useRef(null);
 
   const [progress, setProgress] = useState({});
@@ -27,6 +30,7 @@ export const MediaPreview = ({ media, setMedia, videoGiftId }) => {
     const taskVideo = await createMediaUploadTask({
       uri: currentMedia?.data?.uri,
       getSignedPutUrl,
+      organizationId,
       acl: 'private',
       onProgress: (e) => {
         setProgress({
@@ -55,17 +59,28 @@ export const MediaPreview = ({ media, setMedia, videoGiftId }) => {
 
       const mediaResponse = await createMedia({
         // previewImageUrl: taskPicture?.url,
-        originalKey: taskVideo?.key,
-        type: 'VIDEO',
-        videoGiftId
+        organizationId,
+        videoGiftId,
+        // participantId: data?.participantId,
+        medias: [
+          {
+            originalKey: taskVideo?.key,
+            type: 'VIDEO',
+            // previewImageUrl,
+            // participantId: data?.participantId,
+            videoType: 'SUPPLEMENTARY',
+            // title: mediaFile?.title,
+            // subTitle: mediaFile?.subTitle
+          }
+        ]
       });
-      if (mediaResponse?.data) {
-        selectMedia({
-          videoGiftId,
-          mediaId: mediaResponse?.data?.id,
-          order: 'NEXT'
-        });
-      }
+      // if (mediaResponse?.data) {
+      //   selectMedia({
+      //     videoGiftId,
+      //     mediaId: mediaResponse?.data?.id,
+      //     order: 'NEXT'
+      //   });
+      // }
 
       setMedia(
         map(media, (m) => {

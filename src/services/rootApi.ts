@@ -30,7 +30,17 @@ export const rootApi = createApi({
     'Me',
     'OrganizationsUsers',
     'backgroundMusic',
-    'theme'
+    'theme',
+    'Media',
+    'Users',
+    'UserProfile',
+    'BgCategories',
+    'BgMusic',
+    'ThemeCategories',
+    'Themes',
+    'Participants',
+    'Prompts',
+    'Files'
   ],
 
   endpoints: () => ({})

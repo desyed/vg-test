@@ -11,36 +11,40 @@ const videoGiftApi = rootApi.injectEndpoints({
     }),
     getAllBgMusic: builder.query({
       providesTags: ['backgroundMusic'],
-      query: ({catId, page}:{catId?: string, page?: number}) => ({
-        url: `/backgroundMusic?backgroundMusicCategoryId=${catId || ''}&page=${
-          page || 1
-        }`,
+      query: ({ catId, page }:{catId?: string, page?: number}) => ({
+        url: `/backgroundMusic?backgroundMusicCategoryId=${catId || ''}&page=${ page || 1 }`,
         method: 'GET'
       })
     }),
     selectBgMusic: builder.mutation({
       invalidatesTags: ['backgroundMusic'],
-      query: (body: { videoGiftId: string; backgroundMusicId: string }) => ({
-        url: `/videogift/backgroundMusic`,
+      query: ({
+        organizationId,
+        ...body
+      }: {
+        videoGiftId: string;
+        backgroundMusicId: string;
+        organizationId: string;
+      }) => ({
+        url: `/organization/${organizationId}/videogift/backgroundMusic`,
         method: 'POST',
         body
       })
     }),
     selectedBackgroundMusic: builder.query({
-      query: (videoGiftId: string) => ({
-        url: `/videogift/backgroundMusic?videoGiftId=${videoGiftId}`,
+      query: (payload: { videoGiftId: string; organizationId: string }) => ({
+        url: `/organization/${payload.organizationId}/videogift/backgroundMusic?videoGiftId=${payload.videoGiftId}`,
         method: 'GET'
       }),
       providesTags: ['backgroundMusic']
     }),
     removeSelectedBackgroundMusic: builder.mutation({
-      query: ({ videoGiftId, bgMusicId }) => ({
-        url: `/videogift/backgroundMusic?videoGiftId=${videoGiftId}&videoGiftBackgroundMusicId=${bgMusicId}`,
+      query: ({ videoGiftId, bgMusicId, organizationId }) => ({
+        url: `/organization/${organizationId}/videogift/backgroundMusic?videoGiftId=${videoGiftId}&videoGiftBackgroundMusicId=${bgMusicId}`,
         method: 'DELETE'
       }),
       invalidatesTags: ['backgroundMusic']
-    }),
-
+    })
   }),
   overrideExisting: false
 });
@@ -51,5 +55,5 @@ export const {
   useSelectedBackgroundMusicQuery,
   useGetAllBgMusicQuery,
   useLazyGetAllBgMusicQuery,
-  useGetBgMusicCategoriesQuery,
+  useGetBgMusicCategoriesQuery
 } = videoGiftApi;

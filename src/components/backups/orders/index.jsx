@@ -7,14 +7,14 @@ import { Button, LoaderScreen, Text, View } from 'react-native-ui-lib';
 import { useSelector } from 'react-redux';
 import { useGetOrdersQuery } from 'services/ordersApi';
 import { useGeneratePreviewMutation } from 'services/videoGiftApi';
-const Item = ({ item, index, generatePreview }) => {
+const Item = ({ item, index, generatePreview, organizationId }) => {
   const router = useRouter();
   return (
     <>
       <View flex margin-10 bg-grey70 padding-10>
         <View>
           <Text text70 style={{ flex: 1, marginRight: 10 }} numberOfLines={1}>
-            {item.videoGiftCustomer?.name}
+            {item?.videoGiftCustomer?.name}
           </Text>
         </View>
         <View>
@@ -73,7 +73,7 @@ const Item = ({ item, index, generatePreview }) => {
                   label="Add Media"
                 />
                 <Button
-                  onPress={() => generatePreview({ videoGiftId: item?.id })}
+                  onPress={() => generatePreview({ videoGiftId: item?.id, organizationId })}
                   label="Refresh Preview"
                 />
               </View>
@@ -123,7 +123,7 @@ export default function Index() {
   };
 
   useEffect(() => {
-    if (!user.organizationId) return;
+    if (!user.organizationId) {};
   }, [user.organizationId]);
 
   const updateData = filter(pick(orders, ['updateDate']), Boolean);
@@ -139,7 +139,7 @@ export default function Index() {
           data={orders}
           extraData={updateData}
           renderItem={(data) => (
-            <Item generatePreview={generatePreview} {...data} />
+            <Item organizationId={user?.selectedOrganizationId } generatePreview={generatePreview} {...data} />
           )}
           keyExtractor={keyExtractor}
           onRefresh={() => onRefresh()}

@@ -3,17 +3,20 @@ import { rootApi } from './rootApi';
 interface Theme {
   id?: string;
   title: string;
+  organizationId?: string;
   themeCategoryId: string;
   previewImageUrl: string;
   isCompanyTheme: boolean;
 }
 interface ImageBody {
   id: string;
+  organizationId?: string;
   imageUrl: string;
   imageThumbUrl: string;
 }
 interface UpdateImage {
   id: string;
+  organizationId?: string;
   themeId: string;
   order: string;
 }
@@ -28,7 +31,7 @@ const videoGiftApi = rootApi.injectEndpoints({
     }),
     createTheme: builder.mutation({
       invalidatesTags: ['theme'],
-      query: (body: Theme) => ({
+      query: ({ organizationId, ...body }: Theme) => ({
         url: `/themes/create`,
         method: 'POST',
         body
@@ -36,7 +39,7 @@ const videoGiftApi = rootApi.injectEndpoints({
     }),
     updateTheme: builder.mutation({
       invalidatesTags: ['theme'],
-      query: ({ id, ...body }: Theme) => ({
+      query: ({ id, organizationId, ...body }: Theme) => ({
         url: `/themes/${id}`,
         method: 'PUT',
         body
@@ -44,14 +47,14 @@ const videoGiftApi = rootApi.injectEndpoints({
     }),
     deleteTheme: builder.mutation({
       invalidatesTags: ['theme'],
-      query: (id: string) => ({
+      query: ({ id }) => ({
         url: `/themes/${id}`,
         method: 'DELETE'
       })
     }),
     getAllThemes: builder.query({
       providesTags: ['theme'],
-      query: (catId?: string) => ({
+      query: ({ catId, organizationId}: any) => ({
         url: `/themes?themeCategoryId=${catId || ''}`,
         method: 'GET'
       })
@@ -59,7 +62,7 @@ const videoGiftApi = rootApi.injectEndpoints({
     createThemeImage: builder.mutation({
       invalidatesTags: ['theme'],
       query: (payload: ImageBody) => ({
-        url: `themes/${payload.id}/images/create`,
+        url: `/themes/${payload.id}/images/create`,
         method: 'POST',
         body: payload
       })

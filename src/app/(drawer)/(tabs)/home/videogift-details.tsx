@@ -7,6 +7,7 @@ import { SectionTitle } from 'components/ui/Title';
 import { ResizeMode, Video } from 'expo-av';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 // import * as ScreenOrientation from 'expo-screen-orientation';
+import * as _ from 'lodash';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Dimensions, StyleSheet, View } from 'react-native';
 import DraggableFlatList, {
@@ -16,25 +17,28 @@ import { ScrollView } from 'react-native-gesture-handler';
 import {
   ActionSheet,
   Colors,
-  Image,
   Text,
-  TouchableOpacity
+  TouchableOpacity,
+  Button
 } from 'react-native-ui-lib';
+import { useSelector } from 'react-redux';
 import {
+  useCreateBatchMediaMutation,
+  useCreateMediaMutation,
   useGetSelectedMediaQuery,
-  useMoveSelectedMediaOrderMutation
+  useMoveSelectedMediaOrderMutation,
+  useSelectMediaMutation
 } from 'services/mediaApi';
 import {
   useGeneratePreviewMutation,
   useGetVideoGiftByIdQuery
 } from 'services/videoGiftApi';
 
-import MusicTab from '../../../../components/backgroundMusic/music-tab';
-
-import hairlineWidth = StyleSheet.hairlineWidth;
-
-import Theme from '../../../../components/theme/theme';
 import ProgressiveImage from '../../../../components/ProgressiveImage';
+import MusicTab from '../../../../components/backgroundMusic/music-tab';
+import Theme from '../../../../components/theme/theme';
+import { useGetSignedPutUrlMutation } from '../../../../services/awsApi';
+import { createMediaUploadTask, pickImage } from '../../../../utils/uploadUtil';
 
 const Tab = createMaterialTopTabNavigator();
 
@@ -52,6 +56,7 @@ const PREVIEW_WIDTH = 120;
 
 const VideoPreview = ({ item, index, drag, isActive }) => {
   const router = useRouter();
+  console.log('item', item);
   return (
     <ScaleDecorator>
       <View style={{ height: PREVIEW_WIDTH + 10 }}>
@@ -80,7 +85,7 @@ const VideoPreview = ({ item, index, drag, isActive }) => {
         >
           <ProgressiveImage
             thumbnailSource={require('../../../../../assets/loading.png')}
-            source={{ uri: `${item?.media?.previewImageUrl}` }}
+            source={{ uri: `${item?.media?.transcoderJobStatus === 'PENDING'? require('../../../../../assets/loading.png') : item?.media?.previewImageUrl}` }}
             style={{ width: PREVIEW_WIDTH, height: PREVIEW_WIDTH - 50 }}
             resizeMode="cover"
           />
@@ -115,28 +120,94 @@ const VideoPreview = ({ item, index, drag, isActive }) => {
 };
 const DetailScreen = ({ videoGiftData }) => {
   const router = useRouter();
+  const organizationId = useSelector(
+    (state) => state?.auth?.user?.selectedOrganizationId
+  );
   const [data, setData] = useState([]);
+  const [imageLoading, setImageLoading] = useState(false);
   const videoPreviewFlatlist = useRef(null);
   const windowWidth = Dimensions.get('window').width;
+  const [getSignedPutUrl] = useGetSignedPutUrlMutation();
+  const [createMedia] = useCreateBatchMediaMutation();
 
   const [triggerMoveSelectedMedia] = useMoveSelectedMediaOrderMutation();
 
+  const uploadImage = async () => {
+    console.log('uploadImage');
+    setImageLoading(true);
+    const resizedImage = await pickImage();
+    const task = await createMediaUploadTask({
+      uri: resizedImage?.uri,
+      getSignedPutUrl,
+      acl: 'private',
+      onProgress: (e) => {
+        // setProgress({
+        //     ...progress,
+        //
+        //     [currentMedia?.id]: {
+        //         ...progress[currentMedia?.id],
+        //         video: e.totalBytesSent / e.totalBytesExpectedToSend
+        //     }
+        // });
+        // console.info('PROGRESS', progress);
+      }
+    });
+
+    if (task) {
+      await task.task.uploadAsync();
+      console.log('task', task, data);
+      const mediaType = task?.mimeType?.includes('image') ? 'IMAGE' : 'VIDEO';
+
+      const mediaResponse = await createMedia({
+        // previewImageUrl: taskPicture?.url,
+        videoGiftId: videoGiftData?.videoGift?.id,
+        // participantId: data?.participantId,
+        organizationId,
+        medias: [
+          {
+            type: mediaType,
+            originalKey: task?.key,
+            // previewImageUrl,
+            // participantId: data?.participantId,
+            videoType: 'SUPPLEMENTARY'
+            // title: mediaFile?.title,
+            // subTitle: mediaFile?.subTitle
+          }
+        ]
+        // originalKey: task?.key,
+        // type: 'VIDEO',
+        // videoGiftId: videoGiftData?.videoGift?.id
+      });
+    }
+
+    setImageLoading(false);
+  };
+
   const {
-    data: selectedMedia,
+    data:selectedMedia,
     isLoading: selectMediaIsLoading,
     refetch: refetchSelectedMedia
   } = useGetSelectedMediaQuery({
-    videoGiftId: videoGiftData?.videoGift?.id
-  });
+    videoGiftId: videoGiftData?.videoGift?.id,
+    organizationId
+  }, { refetchOnMountOrArgChange: true });
 
   useEffect(() => {
     setData(selectedMedia);
   }, [selectedMedia]);
+
   return (
     <View style={{ flex: 1 }}>
-      <StandardContainer style={{}}>
+      <StandardContainer
+        style={{
+          display: 'flex',
+          gap: 5,
+          flexDirection: 'row',
+          justifyContent: 'center'
+        }}
+      >
         <PrimaryButton
-          label="Add Media"
+          label="Create Media"
           onPress={() => {
             router.push({
               pathname: '/(drawer)/(tabs)/home/recorder',
@@ -144,10 +215,15 @@ const DetailScreen = ({ videoGiftData }) => {
             });
           }}
         />
+        <Button
+          label="Upload Media"
+          backgroundColor={Colors.green20}
+          onPress={uploadImage}
+        />
       </StandardContainer>
       <StandardContainer>
         <SectionTitle>{videoGiftData?.videoGift?.title}</SectionTitle>
-        {data && (
+        {data && !_.isEmpty(data) && (
           <Text style={{ color: Colors.yellow5 }}>
             * Long press item to rearrange or click to edit
           </Text>
@@ -164,14 +240,15 @@ const DetailScreen = ({ videoGiftData }) => {
             setData(data);
             triggerMoveSelectedMedia({
               videoGiftId: videoGiftData?.videoGift?.id,
+              organizationId,
               selectedMedia: data.map((item, index) => {
                 return { id: item.id, order: index };
               })
             });
           }}
           keyExtractor={(item) => item.id}
+          /* @ts-ignore */
           renderItem={({ item, index, drag, isActive }) => {
-            console.info('item ', item);
             return (
               <VideoPreview
                 item={item}
@@ -190,8 +267,8 @@ const DetailScreen = ({ videoGiftData }) => {
                 <Text>Loading...</Text>
               ) : (
                 <Text style={{ color: Colors.yellow5 }}>
-                  <Ionicons size={18} name="information-circle-outline" /> No
-                  Media added! Please add Media.
+                  <Ionicons size={18} name="information-circle-outline" />
+                  No Media added! Please add Media.
                 </Text>
               )}
             </View>
@@ -208,14 +285,18 @@ export default function VideoGiftDetailScreen() {
   const searchParams = useLocalSearchParams();
   const windowWidth = Dimensions.get('window').width;
   const windowHeight = Dimensions.get('window').height;
+  const organizationId = useSelector(
+    (state) => state?.auth?.user?.selectedOrganizationId
+  );
 
   const {
     data: videoGiftData,
     isLoading,
     refetch: refetchVideoGift
-  } = useGetVideoGiftByIdQuery(searchParams?.videoGiftId, {
-    refetchOnMountOrArgChange: true
-  });
+  } = useGetVideoGiftByIdQuery(
+    { videoGiftId: searchParams?.videoGiftId, organizationId },
+    { refetchOnMountOrArgChange: true }
+  );
 
   const [generatePreview] = useGeneratePreviewMutation();
 
@@ -341,13 +422,13 @@ export default function VideoGiftDetailScreen() {
           {
             label: 'Generate Preview',
             onPress: async () => {
-              await generatePreview({ videoGiftId: searchParams?.videoGiftId });
+              await generatePreview({ videoGiftId: searchParams?.videoGiftId, organizationId });
               refetchVideoGift();
             }
           },
           {
             label: 'Mark Complete',
-            onPress: () => this.pickOption('option 2')
+            onPress: () => console.log('mark complete clicked')
           },
           {
             label: 'Cancel',

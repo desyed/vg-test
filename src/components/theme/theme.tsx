@@ -14,12 +14,16 @@ import { LoaderView } from '../ui/LoaderView';
 import { PrimaryButton } from '../ui/PrimaryButton';
 import { StandardContainer } from '../ui/StandardContainer';
 import { SectionTitle } from '../ui/Title';
+import { useSelector } from "react-redux";
 
 const hairlineWidth = StyleSheet.hairlineWidth;
 
 const Theme = ({ videoGiftId }: { videoGiftId: string }) => {
+  const organizationId = useSelector(
+    (state) => state?.auth?.user?.selectedOrganizationId
+  );
   const { data: videoGiftDetails, isLoading, isFetching } =
-    useGetVideoGiftByIdQuery(videoGiftId);
+    useGetVideoGiftByIdQuery({ videoGiftId, organizationId });
 
   const router = useRouter();
 

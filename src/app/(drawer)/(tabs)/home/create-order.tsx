@@ -8,15 +8,21 @@ import { TextInput } from 'components/ui/form/TextInput';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import _ from 'lodash';
 import { useForm } from 'react-hook-form';
-import { View } from 'react-native';
+import { View, Text } from 'react-native';
 import { useGetOccasionsQuery } from 'services/occasionsApi';
 import { useCreateVideoGiftOrderMutation } from 'services/ordersApi';
 import {
   useGetVideoGiftExperiencesQuery,
   useSearchOrganizationUsersQuery
 } from 'services/organizationApi';
+import { Colors, TouchableOpacity } from "react-native-ui-lib";
+import { useSelector } from "react-redux";
 
 export default function CreateCustomerScreen() {
+  const organizationId = useSelector(
+    (state) => state?.auth?.user?.selectedOrganizationId
+  );
+
   const searchParams = useLocalSearchParams();
 
   const router = useRouter();
@@ -25,11 +31,11 @@ export default function CreateCustomerScreen() {
     useCreateVideoGiftOrderMutation();
 
   const { data: experiences, isLoading: isLoadingExperiences } =
-    useGetVideoGiftExperiencesQuery({
+    useGetVideoGiftExperiencesQuery({ organizationId },{
       refetchOnMountOrArgChange: true
     });
 
-  const { data: users, isLoading } = useSearchOrganizationUsersQuery({
+  const { data: users, isLoading } = useSearchOrganizationUsersQuery({organizationId}, {
     refetchOnMountOrArgChange: true
   });
   const { data: occasions, isLoading: isLoadingOccasion } =
@@ -49,11 +55,11 @@ export default function CreateCustomerScreen() {
 
   const onSubmit = async (data) => {
     try {
-      const result = await createOrder(data);
-      if (result.data) {
+      const result = await createOrder({ ...data, organizationId });
+      if (result?.data) {
         router.replace({
           pathname: '/(drawer)/home/videogift-details',
-          params: { videoGiftId: result.data.videoGift.id }
+          params: { videoGiftId: result?.data?.videoGift?.id }
         });
         // alert(JSON.stringify(result.data));
       }
@@ -94,18 +100,21 @@ export default function CreateCustomerScreen() {
                 value: data.id,
                 label: `${data.title}`
               }))}
-              label="VideoGift Expericence"
+              label="VideoGift Template"
               control={control}
               name="parentVideoGiftId"
               rules={{
-                required: 'Video Gift Experience is required'
+                required: 'Video Gift Template is required'
               }}
-              placeholder="Select VideoGift Experience"
+              placeholder="Select VideoGift Template"
               textInputProps={{
                 returnKeyType: 'next'
               }}
               // inputProps={{ label: 'Assigned To' }}
             />
+            <TouchableOpacity onPress={()=>{}}>
+              <Text style={{color: Colors.grey20, textAlign: "right"}}>Don't have template?</Text>
+            </TouchableOpacity>
             <TextInput
               control={control}
               rules={{ required: 'Name is required' }}
@@ -139,14 +148,14 @@ export default function CreateCustomerScreen() {
                 autoCorrect: false
               }}
             />
-            <TextInput
-              control={control}
-              name="phone"
-              label="Customer Phone"
-              rules={{}}
-              placeholder="Phone"
-              textInputProps={{ returnKeyType: 'next', inputMode: 'tel' }}
-            />
+            {/*<TextInput*/}
+            {/*  control={control}*/}
+            {/*  name="phone"*/}
+            {/*  label="Customer Phone"*/}
+            {/*  rules={{}}*/}
+            {/*  placeholder="Phone"*/}
+            {/*  textInputProps={{ returnKeyType: 'next', inputMode: 'tel' }}*/}
+            {/*/>*/}
             <SelectInput
               items={_.map(occasions?.data, (occasion) => ({
                 value: occasion.id,
@@ -165,7 +174,7 @@ export default function CreateCustomerScreen() {
             <TextInput
               control={control}
               name="title"
-              label="Occasion Title"
+              label="Title of VideoGift"
               rules={{
                 required: 'Title is required'
               }}

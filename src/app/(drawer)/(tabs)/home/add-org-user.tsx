@@ -23,8 +23,12 @@ import {
 import { useUpdateProfileMutation } from '../../../../services/userApi';
 import { createUploadTask, pickImage } from '../../../../utils/uploadUtil';
 import { getInitials } from '../../../../utils/utils';
+import { useSelector } from "react-redux";
 
 const AddUser = () => {
+  const organizationId = useSelector(
+    (state) => state?.auth?.user?.selectedOrganizationId
+  );
   const searchParams = useLocalSearchParams();
   const router = useRouter();
 
@@ -41,7 +45,7 @@ const AddUser = () => {
     isError: isUserLoadingError,
     error,
     isLoading
-  } = useGetOrgUserByIdQuery(searchParams?.id);
+  } = useGetOrgUserByIdQuery({ id: searchParams?.id, organizationId });
 
   const [updateOrgUser, { isLoading: isUpdateLoading }] =
     useUpdateOrgUserMutation();
@@ -88,7 +92,8 @@ const AddUser = () => {
         await task.task.uploadAsync();
         await updateOrgUser({
           id: userIfo?.id,
-          image: task?.url
+          image: task?.url,
+          organizationId
         });
       } catch (e) {
         console.log(e);
@@ -101,8 +106,8 @@ const AddUser = () => {
   const onSubmit = async (data) => {
     try {
       const result = searchParams?.id
-        ? await updateOrgUser({ id: userIfo?.id, ...data })
-        : await createUser(data);
+        ? await updateOrgUser({ id: userIfo?.id, ...data, organizationId })
+        : await createUser({ organizationId, ...data });
       if (result?.data) {
         router.push({
           pathname: '(tabs)/home/organizations'
