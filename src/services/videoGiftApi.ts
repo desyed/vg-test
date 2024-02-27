@@ -9,6 +9,12 @@ const videoGiftApi = rootApi.injectEndpoints({
       }),
       providesTags: ['VideoGifts']
     }),
+    getVideoGiftPrompts: builder.query({
+      query: ({ organizationId, videoGiftId }) => ({
+        url: `/organization/${organizationId}/videogift/${videoGiftId}/prompt`,
+        method: 'GET'
+      })
+    }),
     patchVideoGift: builder.mutation({
       invalidatesTags: ['VideoGifts'],
       query: ({ id, organizationId, ...body }) => ({
@@ -31,6 +37,7 @@ const videoGiftApi = rootApi.injectEndpoints({
 export const {
   useGeneratePreviewMutation,
   useGetVideoGiftByIdQuery,
+  useGetVideoGiftPromptsQuery,
   useLazyGetVideoGiftByIdQuery,
   usePatchVideoGiftMutation
 } = videoGiftApi;
